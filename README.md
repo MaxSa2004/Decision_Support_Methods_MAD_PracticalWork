@@ -1,8 +1,12 @@
 # Decision Support Methods MAD Practical Work
 
-Dependencies:
-ortools
+## Dependencies:
+- ortools
 
-to run:
+## Usage
+to run make sure you have res in the same directory as your python files (res is the rectangles input):
 
-python parse.py res  (make sure you have res in the same directory as your python files)
+`
+python parse.py res 
+`
+
