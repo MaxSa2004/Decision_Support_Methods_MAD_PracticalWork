@@ -3,7 +3,7 @@
 ## Dependencies:
 - ortools
 
-## Usage
+## Usage:
 to run make sure you have res in the same directory as your python files (res is the rectangles input):
 
 `
