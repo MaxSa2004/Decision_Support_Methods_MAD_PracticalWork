@@ -10,3 +10,9 @@ to run make sure you have res in the same directory as your python files (res is
 python parse.py res 
 `
 
+### Benchmarker:
+
+`
+python performance_benchmarker.py 
+`
+`
