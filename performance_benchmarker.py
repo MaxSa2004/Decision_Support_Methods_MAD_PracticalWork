@@ -105,6 +105,7 @@ def main():
         "example_inputs/10rect_5instances",
         "example_inputs/30rect_5instances",
         "example_inputs/50rect_5instances",
+        "example_inputs/100rect_5instances",
     ]
 
     output_file = "benchmark_results.txt"
