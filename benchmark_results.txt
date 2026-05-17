@@ -1,24 +1,36 @@
 ==== example_inputs/10rect_5instances ====
-dynamic: 0.008074 seconds
-greedy: 0.004283 seconds
-integer: 0.014956 seconds
-csp: 0.004764 seconds
+dynamic: 0.726390 seconds
+greedy: 0.786435 seconds
+integer: 0.749426 seconds
+csp: 0.715588 seconds
 
 ==== example_inputs/30rect_5instances ====
 dynamic: time limit exceeded (60 seconds)
-greedy: 0.005537 seconds
-integer: 0.018134 seconds
-csp: 0.014926 seconds
+greedy: 0.719921 seconds
+integer: 0.727680 seconds
+csp: 0.729817 seconds
 
 ==== example_inputs/50rect_5instances ====
 dynamic: time limit exceeded (60 seconds)
-greedy: 0.007453 seconds
-integer: 0.020544 seconds
-csp: 0.046756 seconds
+greedy: 0.661036 seconds
+integer: 0.685144 seconds
+csp: 0.705793 seconds
 
 ==== example_inputs/100rect_5instances ====
 dynamic: time limit exceeded (60 seconds)
-greedy: 0.029593 seconds
-integer: 0.031778 seconds
-csp: 0.363222 seconds
+greedy: 0.779034 seconds
+integer: 0.765813 seconds
+csp: 0.994237 seconds
+
+==== example_inputs/500rect_5instances ====
+dynamic: time limit exceeded (60 seconds)
+greedy: 2.397914 seconds
+integer: 0.973272 seconds
+csp: time limit exceeded (60 seconds)
+
+==== example_inputs/1000rect_5instances ====
+dynamic: time limit exceeded (60 seconds)
+greedy: 19.364834 seconds
+integer: 1.836622 seconds
+csp: time limit exceeded (60 seconds)
 

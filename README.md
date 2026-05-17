@@ -7,7 +7,7 @@
 to run make sure you have res in the same directory as your python files (res is the rectangles input):
 
 `
-python parse.py res 
+python  main.py res 
 `
 
 ### Benchmarker:

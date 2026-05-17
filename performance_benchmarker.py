@@ -4,7 +4,7 @@ import time
 from statistics import mean
 import multiprocessing as mp
 
-from parse import parse_instances, build_coverage_sets
+from main import parse_instances, build_coverage_sets
 
 import dynamic as dynamic_mod
 import greedy as greedy_mod
@@ -102,10 +102,7 @@ def benchmarker(instances, solver_func, runs=2):
 
 def main():
     files = [
-        "example_inputs/10rect_5instances",
-        "example_inputs/30rect_5instances",
-        "example_inputs/50rect_5instances",
-        "example_inputs/100rect_5instances",
+        "example_inputs/1000rect_5instances",
     ]
 
     output_file = "benchmark_results.txt"
