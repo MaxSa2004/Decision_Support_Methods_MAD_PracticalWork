@@ -102,6 +102,11 @@ def benchmarker(instances, solver_func, runs=2):
 
 def main():
     files = [
+        "example_inputs/10rect_5instances",
+        "example_inputs/30rect_5instances",
+        "example_inputs/50rect_5instances",
+        "example_inputs/100rect_5instances", 
+        "example_inputs/500rect_5instances",    
         "example_inputs/1000rect_5instances",
     ]
 
