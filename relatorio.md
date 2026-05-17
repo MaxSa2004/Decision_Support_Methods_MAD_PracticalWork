@@ -1,7 +1,7 @@
 # Relatório do Projeto Prático - Vigilância de Partições Retangulares
 
 **Unidade Curricular:** Métodos de Apoio à Decisão\
-**Alunos:** Orlando Soares, Maximiliano Sá, Paulo Lin\
+**Alunos:** Orlando Soares (up202303606), Maximiliano Sá (up202305979), Paulo Lin (up202304528)\
 **Ano Letivo:** 2025/2026
 
 ---
