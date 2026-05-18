@@ -128,7 +128,7 @@ A abordagem greedy revelou-se extremamente rápida e adequada para produzir solu
 
 ---
 
-# 4. Programação Inteira Binária
+# 4. Programação Inteira Binária com OR-Tools
 
 ## 4.1 Formulação Matemática
 
@@ -168,11 +168,15 @@ No entanto, solvers modernos conseguem resolver eficientemente instâncias de di
 
 ## 4.3 Implementação
 
-A implementação foi realizada em Python utilizando o solver CP-SAT do Google OR-Tools, que permite:
+A implementação foi realizada em Python utilizando o módulo CP-SAT do Google OR-Tools, que permite:
 
 - criação de variáveis binárias;
 - adição de restrições lineares;
 - otimização da função objetivo.
+
+## 4.4 Desempenho
+Este solver demonstrou excelente eficiência na obtenção da solução ótima, apresentando
+tempos de execução residuais.
 
 ---
 
@@ -216,7 +220,7 @@ AC3(queue):
             se domínio(Xi) vazio -> falha
             adicionar arcos vizinhos
 
-Reise(Xi, Xj):
+Revise(Xi, Xj):
     revisado = falso
     para cada valor a em domínio(Xi):
         se não existe valor b em domínio(Xj) que satisfaça a restrição entre Xi e Xj com (a, b):
@@ -231,17 +235,9 @@ Comparativamente ao backtracking puro, a propagação MAC permitiu uma redução
 
 ---
 
-# 6. Resolução Declarativa em Google OR-Tools
+# 6. Programação Dinâmica
 
-Foi implementada uma solução industrial com OR-Tools, utilizando o módulo CP-SAT.
-
-Este solver demonstrou excelente eficiência na obtenção da solução ótima, apresentando tempos de execução residuais.
-
----
-
-# 7. Programação Dinâmica
-
-## 7.1 Definição do Estado
+## 6.1 Definição do Estado
 
 Seja $S$ um subconjunto de retângulos já cobertos.
 
@@ -251,7 +247,7 @@ $$
 DP[S] = número mínimo de guardas necessários para cobrir S
 $$
 
-## 7.2 Transição
+## 6.2 Transição
 
 Para cada vértice $v$:
 
@@ -259,7 +255,7 @@ $$
 DP[S \cup covers(v)] = \min(DP[S \cup covers(v)], DP[S] + 1)
 $$
 
-## 7.3 Análise
+## 6.3 Análise
 
 Esta abordagem garante a obtenção da solução ótima.
 
@@ -269,13 +265,13 @@ $$
 O(2^n \cdot m)
 $$
 
-sendo por isso apenas prática para instâncias pequenas ou médias.
+(onde $n$ é o número de retângulos e $m$ o número de vértices que podem representar guardas) sendo por isso apenas prática para instâncias pequenas ou médias.
 
 ---
 
-# **8. Extensões do Problema**
+# **7. Extensões do Problema**
 
-## **8.1 Guardas com cores (coloração de conflitos)**
+## **7.1 Guardas com cores (coloração de conflitos)**
 
 Nesta extensão introduz-se uma restrição adicional de compatibilidade entre guardas. Em particular, dois guardas não podem partilhar a mesma cor caso exista pelo menos um retângulo que seja observado simultaneamente por ambos. Esta condição modela situações em que a presença conjunta de dois guardas no mesmo domínio de vigilância implica conflito, exigindo a sua diferenciação através de cores.
 
@@ -308,7 +304,7 @@ onde $n$ é o número de guardas e $k$ o número de cores utilizadas na soluçã
 
 ---
 
-## **8.2 Guardas com maior alcance**
+## **7.2 Guardas com maior alcance**
 
 Nesta extensão considera-se um parâmetro de alcance $D$, que permite a um guarda vigiar não apenas os retângulos diretamente incidentes no seu vértice, mas também retângulos adjacentes até uma distância de grafo no máximo $D$.
 
@@ -349,7 +345,7 @@ Como esta expansão é feita antes da resolução do problema principal, o custo
 
 ---
 
-# 9. Descrição da Implementação
+# 8. Descrição da Implementação
 
 A implementação foi desenvolvida integralmente em Python, organizando-se da seguinte maneira:
 
@@ -368,7 +364,7 @@ Esta modularização facilitou a reutilização da mesma matriz de cobertura por
 
 ---
 
-# 10. Resultados Experimentais
+# 9. Resultados Experimentais
 
 Para avaliar o desempenho das diferentes abordagens implementadas, foi desenvolvido um script de benchmarking responsável por executar múltiplas instâncias e calcular o tempo médio de execução de cada algoritmo.
 
@@ -382,7 +378,7 @@ O benchmarking foi implementado utilizando:
 
 O código executa cada solver múltiplas vezes e calcula a média dos tempos obtidos.
 
-## 10.1 Resultados Obtidos
+## 9.1 Resultados Obtidos
 
 | Instância            | Dynamic Programming        | Greedy     | Integer Programming | CSP + MAC/AC3              |
 | -------------------- | -------------------------- | ---------- | ------------------- | -------------------------- |
@@ -393,7 +389,7 @@ O código executa cada solver múltiplas vezes e calcula a média dos tempos obt
 | `500rect_5instances`  | Time Limit Exceeded (60 s) | 2.397914 s  | 0.973272 s          | Time Limit Exceeded (60 s) |
 | `1000rect_5instances` | Time Limit Exceeded (60 s) | 19.364834 s | 1.836622 s          | Time Limit Exceeded (60 s) |
 
-## 10.2 Análise dos Resultados
+## 9.2 Análise dos Resultados
 
 Os resultados experimentais obtidos permitem observar diferenças claras de escalabilidade entre os diferentes paradigmas de resolução implementados.
 
@@ -403,7 +399,7 @@ O **CSP com MAC+AC3** foi competitivo nas instâncias pequenas e médias (até 1
 
 O **Greedy** manteve-se funcional ao longo de todos os conjuntos, mas evidenciou uma degradação crescente: de ≈ 0.7 s nas instâncias pequenas, passou para 2.4 s com 500 retângulos e 19.4 s com 1000 retângulos. Este comportamento mostra que o custo acumulado das iterações cresce de forma considerável com a dimensão do problema.
 
-A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se como a abordagem mais robusta em todos os conjuntos testados. Resolveu as instâncias de 500 retângulos em 0.97 s e as de 1000 retângulos em 1.84 s — consideravelmente mais rápido do que o Greedy nas instâncias maiores, e garantindo sempre a solução ótima.
+A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se como a abordagem mais robusta em todos os conjuntos testados. Resolveu as instâncias de 500 retângulos em 0.97 s e as de 1000 retângulos em 1.84 s - consideravelmente mais rápido do que o Greedy nas instâncias maiores, e garantindo sempre a solução ótima.
 
 No geral, os resultados mostram que:
 
@@ -414,26 +410,26 @@ No geral, os resultados mostram que:
 
 ---
 
-# 11. Conclusão
+# 10. Conclusão
 
 O presente projeto permitiu estudar e comparar múltiplas metodologias de apoio à decisão aplicadas ao problema de vigilância de partições retangulares, um problema de cobertura combinatória com relevância teórica e prática.
 
-Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável além de instâncias muito pequenas, dada a sua complexidade $O(2^n \cdot m)$. O **CSP com MAC+AC3**, embora eficaz em instâncias moderadas, não conseguiu escalar para além dos 100 retângulos. O **Greedy**, apesar de simples e funcional, revelou degradação expressiva nas instâncias maiores — chegando a 19.4 s para 1000 retângulos — mostrando que não constitui a melhor alternativa em termos de velocidade quando a dimensão do problema cresce.
+Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável além de instâncias muito pequenas, dada a sua complexidade $O(2^n \cdot m)$. O **CSP com MAC+AC3**, embora eficaz em instâncias moderadas, não conseguiu escalar para além dos 100 retângulos. O **Greedy**, apesar de simples e funcional, revelou degradação expressiva nas instâncias maiores - chegando a 19.4 s para 1000 retângulos - mostrando que não constitui a melhor alternativa em termos de velocidade quando a dimensão do problema cresce.
 
 A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se inequivocamente como a abordagem mais robusta: resolveu todos os conjuntos de teste dentro do limite temporal, mantendo tempos abaixo dos 2 segundos mesmo para 1000 retângulos, e garantindo sempre a solução ótima. É a escolha recomendada para instâncias de qualquer dimensão onde se exija qualidade e escalabilidade.
 
 Em suma:
 
-- **OR-Tools (CP-SAT)** — solução preferencial: ótima, rápida e escalável;
-- **Greedy** — útil como heurística inicial ou em instâncias pequenas, mas não escala;
-- **CSP com MAC+AC3** — adequado para instâncias moderadas, com valor académico relevante;
-- **Programação Dinâmica** — referência de optimalidade, restrita a instâncias muito pequenas.
+- **OR-Tools (CP-SAT)** - solução preferencial: ótima, rápida e escalável;
+- **Greedy** - útil como heurística inicial ou em instâncias pequenas, mas não escala;
+- **CSP com MAC+AC3** - adequado para instâncias moderadas, com valor académico relevante;
+- **Programação Dinâmica** - referência de optimalidade, restrita a instâncias muito pequenas.
 
-As extensões implementadas — coloração de guardas e alcance ampliado — demonstraram ainda que a abstração central do projeto, a matriz de cobertura, é suficientemente flexível para acomodar variantes mais ricas do problema sem alterar a arquitectura de resolução.
+As extensões implementadas - coloração de guardas e alcance ampliado - demonstraram ainda que a abstração central do projeto, a matriz de cobertura, é suficientemente flexível para acomodar variantes mais ricas do problema sem alterar a arquitectura de resolução.
 
 ---
 
-# 12. Adaptação ao Formato das Instâncias
+# 11. Adaptação ao Formato das Instâncias
 
 O gerador de instâncias utilizado no projeto produz ficheiros no formato:
 
@@ -460,7 +456,7 @@ Exemplo:
 
 Cada linha define um retângulo da partição.
 
-## 12.1 Parser das Instâncias
+## 11.1 Parser das Instâncias
 
 Foi desenvolvido um parser responsável por:
 
@@ -571,9 +567,9 @@ Desta forma todos os algoritmos implementados podem ser executados diretamente s
 
 ---
 
-# 13. Implementações dos Algoritmos
+# 12. Implementações dos Algoritmos
 
-## 13.1 Implementação Greedy em Python
+## 12.1 Implementação Greedy em Python
 
 ```python
 class GreedySolver:
@@ -604,7 +600,7 @@ class GreedySolver:
         return guards
 ```
 
-## 13.2 Implementação de Programação Inteira com OR-Tools
+## 12.2 Implementação de Programação Inteira com OR-Tools
 
 ```python
 from ortools.sat.python import cp_model
@@ -632,7 +628,7 @@ class IntegerSolver:
         return [i for i in range(self.m) if solver.Value(x[i]) == 1]
 ```
 
-## 13.3 Implementação MAC + AC3
+## 12.3 Implementação MAC + AC3
 
 ```python
 class MACSolver:
@@ -677,7 +673,7 @@ class MACSolver:
         return self.backtrack([None]*self.m)
 ```
 
-## 13.4 Implementação de Programação Dinâmica
+## 12.4 Implementação de Programação Dinâmica
 
 ```python
 class DPSolver:
@@ -714,7 +710,7 @@ class DPSolver:
                     queue.append(new_state)
 ```
 
-## 13.5 Implementação da Extensão Guardas Coloridos
+## 12.5 Implementação da Extensão Guardas Coloridos
 
 ```python
 def build_conflict_graph(selected_guards, coverage_matrix):
@@ -797,7 +793,7 @@ def exact_coloring(graph):
     return best_coloring, best_k
 ```
 
-## 13.6 Implementação da Extensão Alcance D
+## 12.6 Implementação da Extensão Alcance D
 
 ```python
 def build_rectangle_graph(instance):
@@ -898,11 +894,11 @@ def build_expanded_coverage_sets(instance, D):
 
 ---
 
-# 14. Algoritmo de Benchmarking
+# 13. Algoritmo de Benchmarking
 
 Para medir o desempenho médio dos algoritmos implementados, foi utilizado o script `performance_benchmarker.py`, baseado em execução isolada por processo e limitação temporal por instância.
 
-## 14.1 Estratégia de Medição
+## 13.1 Estratégia de Medição
 
 A metodologia adotada segue os passos:
 
@@ -914,7 +910,7 @@ A metodologia adotada segue os passos:
 
 A execução isolada por processo permite interromper algoritmos que excedam o tempo máximo sem bloquear o benchmarking global.
 
-## 14.2 Pseudocódigo
+## 13.2 Pseudocódigo
 
 ```text
 Benchmark(files, solvers, runs, time_limit):
@@ -942,7 +938,7 @@ Benchmark(files, solvers, runs, time_limit):
                 escrever mean(times)
 ```
 
-## 14.3 Implementação Utilizada
+## 13.3 Implementação Utilizada
 
 ```python
 TIME_LIMIT = 60
@@ -997,7 +993,7 @@ Esta implementação foi a base dos resultados apresentados no Capítulo 10.
 
 ---
 
-# 15. Discussão Técnica Global
+# 14. Discussão Técnica Global
 
 A implementação prática confirmou que toda a arquitetura do projeto pode ser construída em torno de uma única abstração central: a matriz de cobertura entre vértices e retângulos.
 
