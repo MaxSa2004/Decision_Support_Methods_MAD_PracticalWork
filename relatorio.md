@@ -81,6 +81,20 @@ $$
 
 Quando `required` é omitido, assume-se $\Pi' = \Pi$ (cobertura total), preservando o comportamento original. Esta generalização foi implementada em todos os solvers sem alterar a interface existente.
 
+## 2.4 Complexidade: Cobertura Total vs Cobertura de Subconjunto (na teoria)
+
+É importante distinguir dois cenários conceptualmente diferentes:
+
+- **Cobertura total**: quando o requisito é cobrir a totalidade dos elementos-alvo do modelo, o problema pode, em formulações estruturadas específicas, ser reduzido a um problema clássico com algoritmo polinomial (por exemplo, uma redução para um problema em grafos bipartidos).
+- **Cobertura parcial (subconjunto)**: quando apenas um subconjunto de elementos é obrigatório, essa redução deixa, em geral, de ser válida. O problema resultante mantém a natureza combinatória difícil e é tipicamente NP-hard.
+
+Esta diferença justifica a opção por duas famílias de métodos ao longo do projeto:
+
+- métodos de otimização exata (ILP/DP) para garantir optimalidade quando a dimensão o permite;
+- métodos heurísticos ou de satisfazibilidade (greedy/CSP) para obter soluções viáveis rapidamente quando a variante parcial conduz a instâncias computacionalmente mais exigentes.
+
+Do ponto de vista prático, o greedy não garante solução ótima no caso NP-hard, mas constitui uma estratégia de aproximação eficaz, com boa relação entre qualidade da solução e tempo de execução.
+
 ---
 
 # 3. Estratégias Greedy
@@ -124,7 +138,11 @@ por iteração, conduzindo na prática a tempos de execução muito baixos.
 
 ## 3.4 Discussão
 
-A abordagem greedy revelou-se extremamente rápida e adequada para produzir soluções iniciais. Contudo, por não considerar consequências globais futuras, conduz frequentemente a soluções subótimas.
+A abordagem greedy revelou-se adequada para produzir soluções, mesmo em instâncias de grande dimensão. Contudo, por não considerar consequências globais futuras, conduz frequentemente a soluções subótimas.
+
+Este comportamento torna-se particularmente relevante no cenário de cobertura parcial (subconjunto obrigatório), onde a estrutura do problema deixa de permitir reduções polinomiais diretas e a dificuldade combinatória aumenta. Nesses casos, as heurísticas greedy funcionam como algoritmos de aproximação: sacrificam garantia de optimalidade, mas devolvem soluções viáveis em tempos reduzidos.
+
+Apesar disso, os resultados experimentais mostram que, para instâncias muito grandes, o OR-Tools (CP-SAT) foi mais eficiente na prática do que o greedy.
 
 ---
 
@@ -195,10 +213,10 @@ $$
 Para cada retângulo gera-se uma restrição disjuntiva:
 
 $$
-X_{a} \lor X_{b} \lor X_{c} \lor X_{d}
+\bigvee_{i \in C(r)} X_i
 $$
 
-onde $a,b,c,d$ representam os vértices incidentes.
+onde $C(r)$ representa o conjunto de vértices que cobrem o retângulo $r$.
 
 ## 5.2 Backtracking com MAC
 
@@ -210,23 +228,23 @@ Foi implementado um algoritmo de procura em profundidade com:
 
 ## 5.3 Algoritmo AC-3
 
-Após cada atribuição é executado o AC-3 para eliminar valores inconsistentes dos domínios das restantes variáveis.
+Após cada atribuição é executado AC-3 sobre pares (variável, restrição), removendo valores sem suporte na restrição de cobertura.
 
 ### Pseudocódigo
 
 ```text
 AC3(queue):
     enquanto queue não vazio:
-        remover arco (Xi, Xj)
-        se Revise(Xi, Xj):
-            se domínio(Xi) vazio -> falha
-            adicionar arcos vizinhos
+        remover (var, rect)
+        se Revise(var, rect):
+            se domínio(var) vazio -> falha
+            adicionar pares vizinhos afetados
 
-Revise(Xi, Xj):
+Revise(var, rect):
     revisado = falso
-    para cada valor a em domínio(Xi):
-        se não existe valor b em domínio(Xj) que satisfaça a restrição entre Xi e Xj com (a, b):
-            remover a de domínio(Xi)
+    para cada valor em domínio(var):
+        se não houver suporte na restrição "pelo menos um vértice cobre rect":
+            remover valor de domínio(var)
             revisado = verdadeiro
     retornar revisado
 ```
@@ -234,6 +252,12 @@ Revise(Xi, Xj):
 ## 5.4 Vantagens
 
 Comparativamente ao backtracking puro, a propagação MAC permitiu uma redução substancial do espaço de procura.
+
+## 5.5 Nota sobre Optimalidade do CSP Implementado
+
+O solver CSP implementado (`csp_mac.py`) resolve um problema de **satisfazibilidade**: encontra uma atribuição válida que cobre todos os retângulos obrigatórios, mas **não** inclui função objetivo para minimizar o número de guardas.
+
+Assim, a primeira solução viável devolvida pela procura pode usar mais guardas do que outros métodos (incluindo greedy ou ILP). Para obter optimalidade em CSP seria necessário acrescentar um mecanismo de otimização (por exemplo, branch-and-bound sobre $\sum_i X_i$ ou pesquisa iterativa com limite no número de guardas).
 
 ---
 
@@ -267,7 +291,7 @@ $$
 O(2^n \cdot m)
 $$
 
-(onde $n$ é o número de retângulos e $m$ o número de vértices que podem representar guardas) sendo por isso apenas prática para instâncias pequenas ou médias.
+(onde $n$ é o número de retângulos e $m$ o número de vértices que podem representar guardas) sendo por isso apenas prática para instâncias pequenas.
 
 ---
 
@@ -353,14 +377,11 @@ A implementação foi desenvolvida integralmente em Python, organizando-se da se
 
 - `main.py`, leitura da partição, construção da matriz de cobertura e print dos resultados do método escolhido;
 - `greedy.py`, heurísticas greedy;
-- `integer_solver.py`, modelo de programação inteira;
+- `integer_solver.py`, modelo de programação inteira - Google OR-Tools;
 - `csp_mac.py`, backtracking com MAC + AC3;
 - `dynamic.py`, programação dinâmica;
 - `extensions.py`, guardas coloridos e alcance D.
-
-Foram ainda produzidas implementações paralelas em:
-
-- Google OR-Tools.
+- `performance_benchmarker.py`, benchmark unificado (solvers base e extensões), com geração de `required` aleatório por rácio e desativação automática de métodos após timeout.
 
 Esta modularização facilitou a reutilização da mesma matriz de cobertura por todos os paradigmas de resolução.
 
@@ -370,47 +391,65 @@ Todos os solvers implementados suportam cobertura parcial através do parâmetro
 
 # 9. Resultados Experimentais
 
-Para avaliar o desempenho das diferentes abordagens implementadas, foi desenvolvido um script de benchmarking responsável por executar múltiplas instâncias e calcular o tempo médio de execução de cada algoritmo.
+Para avaliar o desempenho das abordagens implementadas, foi utilizado o script unificado `performance_benchmarker.py`, que executa métodos base e extensões no mesmo pipeline experimental.
 
-Os testes foram realizados sobre conjuntos de instâncias contendo 10, 30, 50, 100, 500 e 1000 retângulos, com 5 instâncias por ficheiro.
+Configuração usada (conforme `benchmarks_results.txt`):
 
-O benchmarking foi implementado utilizando:
+- `suite=all`;
+- `ratios=[0.1, 0.25, 0.5, 0.75, 1.0]`;
+- `samples_per_ratio=3`;
+- `repetitions=1`;
+- `TIME_LIMIT=60s`.
 
-- `time.perf_counter()` para medição temporal;
-- execução isolada de processos através de `multiprocessing`;
-- limite máximo de execução de 60 segundos por algoritmo.
+Como `ratio=1.0` é equivalente à cobertura total, este rácio é o mais relevante para comparação direta com o problema original.
 
-O código executa cada solver múltiplas vezes e calcula a média dos tempos obtidos.
+## 9.1 Resultados Obtidos (ratio = 1.0)
 
-## 9.1 Resultados Obtidos
+| Instância             | Dynamic | Greedy     | Integer    | CSP        | Coloring   | Expand     |
+| --------------------- | ------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| `10rect_5instances`   | 0.686573 s | 0.659276 s | 0.654564 s | 0.632468 s | 0.648752 s | 0.649922 s |
+| `30rect_5instances`   | n/a (desativado) | 0.764849 s | 0.698455 s | 0.659104 s | 0.659815 s | 0.651680 s |
+| `50rect_5instances`   | n/a | 0.893004 s | 0.749201 s | 0.674262 s | 0.677816 s | 0.668987 s |
+| `100rect_5instances`  | n/a | 0.669252 s | 0.705239 s | 0.660147 s | 0.694367 s | 0.693594 s |
+| `500rect_5instances`  | n/a | 2.155261 s | 0.987748 s | 0.979763 s | 0.994068 s | 0.992772 s |
+| `1000rect_5instances` | n/a | 15.593268 s | 2.227116 s | n/a (desativado) | 2.329794 s | 1.907156 s |
 
-| Instância            | Dynamic Programming        | Greedy     | Integer Programming | CSP + MAC/AC3              |
-| -------------------- | -------------------------- | ---------- | ------------------- | -------------------------- |
-| `10rect_5instances`  | 0.726390 s                 | 0.786435 s | 0.749426 s          | 0.715588 s                 |
-| `30rect_5instances`  | Time Limit Exceeded (60 s) | 0.719921 s | 0.727680 s          | 0.729817 s                 |
-| `50rect_5instances`  | Time Limit Exceeded (60 s) | 0.661036 s | 0.685144 s          | 0.705793 s                 |
-| `100rect_5instances` | Time Limit Exceeded (60 s) | 0.779034 s | 0.765813 s          | 0.994237 s                 |
-| `500rect_5instances`  | Time Limit Exceeded (60 s) | 2.397914 s  | 0.973272 s          | Time Limit Exceeded (60 s) |
-| `1000rect_5instances` | Time Limit Exceeded (60 s) | 19.364834 s | 1.836622 s          | Time Limit Exceeded (60 s) |
+No próprio benchmark, os métodos foram removidos das iterações seguintes após timeout:
+
+- `dynamic` (timeout em `30rect_5instances`, `ratio=0.25`);
+- `csp` (timeout em `1000rect_5instances`, `ratio=0.10`).
 
 ## 9.2 Análise dos Resultados
 
-Os resultados experimentais obtidos permitem observar diferenças claras de escalabilidade entre os diferentes paradigmas de resolução implementados.
+No cenário equivalente ao problema original (`ratio=1.0`):
 
-A **Programação Dinâmica** revelou-se impraticável para além das instâncias mais pequenas: excedeu o limite de 60 segundos a partir das 30 instâncias, confirmando a sua complexidade exponencial $O(2^n \cdot m)$.
+- **Greedy** mantém boa simplicidade, mas degrada significativamente em instâncias grandes (15.59 s em 1000 retângulos);
+- **Integer (CP-SAT)** mantém desempenho robusto e controlado até 1000 retângulos (2.23 s), preservando qualidade da solução;
+- **CSP (MAC+AC3)** é competitivo em pequena/média escala, mas não é robusto em grande dimensão; além disso, como é um solver de satisfazibilidade (sem minimização explícita), pode devolver soluções com mais guardas;
+- **Dynamic** confirma limitação exponencial, tornando-se rapidamente impraticável;
+- **Coloring** fica naturalmente próximo do custo de `integer` acrescido do custo de coloração;
+- **Expand** reduz substancialmente o número médio de guardas graças à cobertura ampliada e teve bom desempenho temporal.
 
-O **CSP com MAC+AC3** foi competitivo nas instâncias pequenas e médias (até 100 retângulos, com tempos entre 0.71 s e 0.99 s), mas colapsou nas instâncias de 500 e 1000 retângulos, evidenciando os limites do backtracking em espaços de procura muito grandes.
+Assim, para cobertura total, os resultados continuam a recomendar **CP-SAT** como alternativa mais estável entre qualidade e escalabilidade.
 
-O **Greedy** manteve-se funcional ao longo de todos os conjuntos, mas evidenciou uma degradação crescente: de ≈ 0.7 s nas instâncias pequenas, passou para 2.4 s com 500 retângulos e 19.4 s com 1000 retângulos. Este comportamento mostra que o custo acumulado das iterações cresce de forma considerável com a dimensão do problema.
+## 9.3 Comportamento em Partial Set Cover (`ratio < 1`)
 
-A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se como a abordagem mais robusta em todos os conjuntos testados. Resolveu as instâncias de 500 retângulos em 0.97 s e as de 1000 retângulos em 1.84 s - consideravelmente mais rápido do que o Greedy nas instâncias maiores, e garantindo sempre a solução ótima.
+Para além do caso `ratio=1.0`, os resultados confirmam um comportamento coerente em cobertura parcial:
 
-No geral, os resultados mostram que:
+- quando `required_ratio` aumenta, o número médio de guardas cresce em todos os métodos (como esperado);
+- a diferença entre **greedy** e **integer (CP-SAT)** aumenta com a dimensão da instância;
+- o **CP-SAT** mantém melhor robustez temporal para rácios intermédios/altos em instâncias grandes;
+- o **csp** tende a usar mais guardas do que integer/greedy porque procura apenas uma solução viável (não mínima), e perde robustez em larga escala;
+- a extensão **expand** reduz fortemente o número de guardas, por aumentar o alcance efetivo de cada guarda.
 
-- **Programação Inteira com OR-Tools** foi a abordagem mais robusta, superando o Greedy em velocidade para instâncias grandes e garantindo optimalidade;
-- **Greedy** é adequado para instâncias pequenas ou como solução inicial rápida, mas não escala bem;
-- **CSP + MAC/AC3** permanece adequado para instâncias de dimensão moderada;
-- **Programação Dinâmica** tem valor sobretudo académico, restringindo-se a instâncias muito pequenas.
+Exemplo representativo em `1000rect_5instances`:
+
+- `ratio=0.10`: greedy = 1.022637 s, integer = 0.772197 s;
+- `ratio=0.50`: greedy = 5.691275 s, integer = 1.149051 s;
+- `ratio=0.75`: greedy = 10.535604 s, integer = 0.942098 s;
+- `ratio=1.00`: greedy = 15.593268 s, integer = 2.227116 s.
+
+Ou seja, mesmo no cenário parcial, os dados do benchmark corroboram que, na prática, **OR-Tools (CP-SAT)** é a alternativa mais eficiente para instâncias grandes, enquanto o greedy é útil sobretudo como baseline heurístico rápido.
 
 ---
 
@@ -418,16 +457,16 @@ No geral, os resultados mostram que:
 
 O presente projeto permitiu estudar e comparar múltiplas metodologias de apoio à decisão aplicadas ao problema de vigilância de partições retangulares, um problema de cobertura combinatória com relevância teórica e prática.
 
-Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável além de instâncias muito pequenas, dada a sua complexidade $O(2^n \cdot m)$. O **CSP com MAC+AC3**, embora eficaz em instâncias moderadas, não conseguiu escalar para além dos 100 retângulos. O **Greedy**, apesar de simples e funcional, revelou degradação expressiva nas instâncias maiores - chegando a 19.4 s para 1000 retângulos - mostrando que não constitui a melhor alternativa em termos de velocidade quando a dimensão do problema cresce.
+Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável para instâncias de dimensão moderada/grande, sofrendo timeout no benchmark unificado. O **CSP com MAC+AC3**, embora competitivo em instâncias pequenas e médias, também apresenta limitações de escalabilidade em dimensão muito elevada e, na versão implementada, não garante mínimo número de guardas por ser um solver de satisfazibilidade. O **Greedy**, apesar de simples e funcional, revelou degradação acentuada no caso de cobertura total (`ratio=1.0`), atingindo 15.59 s para 1000 retângulos.
 
-A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se inequivocamente como a abordagem mais robusta: resolveu todos os conjuntos de teste dentro do limite temporal, mantendo tempos abaixo dos 2 segundos mesmo para 1000 retângulos, e garantindo sempre a solução ótima. É a escolha recomendada para instâncias de qualquer dimensão onde se exija qualidade e escalabilidade.
+A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se novamente como a abordagem mais robusta: no cenário equivalente à cobertura total (`ratio=1.0`) manteve desempenho na ordem dos 2 s para 1000 retângulos, com garantia de optimalidade. É a escolha recomendada para instâncias em que se exija simultaneamente qualidade e escalabilidade.
 
 Em suma:
 
 - **OR-Tools (CP-SAT)** - solução preferencial: ótima, rápida e escalável;
-- **Greedy** - útil como heurística inicial ou em instâncias pequenas, mas não escala;
-- **CSP com MAC+AC3** - adequado para instâncias moderadas, com valor académico relevante;
-- **Programação Dinâmica** - referência de optimalidade, restrita a instâncias muito pequenas.
+- **Greedy** - útil como heurística inicial;
+- **CSP com MAC+AC3** - adequado para encontrar soluções viáveis em instâncias moderadas, mas sem garantia de mínimo número de guardas e com limites em grande escala;
+- **Programação Dinâmica** - referência de optimalidade, restrita a instâncias pequenas.
 
 As extensões implementadas - coloração de guardas e alcance ampliado - demonstraram ainda que a abstração central do projeto, a matriz de cobertura, é suficientemente flexível para acomodar variantes mais ricas do problema sem alterar a arquitectura de resolução.
 
@@ -634,47 +673,105 @@ class IntegerSolver:
 
 ## 12.3 Implementação MAC + AC3
 
+Nota: esta implementação procura uma atribuição viável e termina na primeira solução encontrada. Não há função objetivo para minimizar o número total de guardas.
+
 ```python
+from collections import deque
+
 class MACSolver:
     def __init__(self, coverage_matrix, required=None):
         self.A = coverage_matrix
         self.m = len(coverage_matrix)
-        self.n = len(coverage_matrix[0])
-        # required: indices of rectangles that must be covered (None = all)
+        self.n = len(coverage_matrix[0]) if self.m > 0 else 0
         self.required = list(required) if required is not None else list(range(self.n))
 
-    def is_covered(self, assignment, rect):
-        return any(assignment[i] == 1 and self.A[i][rect] == 1 for i in range(self.m))
+        self.rect_to_vars = {
+            r: [i for i in range(self.m) if self.A[i][r] == 1]
+            for r in self.required
+        }
 
-    def valid_partial(self, assignment):
-        for r in self.required:
-            possible = False
-            for i in range(self.m):
-                if assignment[i] is None and self.A[i][r] == 1:
-                    possible = True
-                if assignment[i] == 1 and self.A[i][r] == 1:
-                    possible = True
-            if not possible:
-                return False
+        self.var_to_rects = {i: [] for i in range(self.m)}
+        for r, vars_covering_r in self.rect_to_vars.items():
+            for i in vars_covering_r:
+                self.var_to_rects[i].append(r)
+
+    def _initial_domains(self):
+        return [set([0, 1]) for _ in range(self.m)]
+
+    def _has_support(self, var, value, rect, domains):
+        if self.A[var][rect] == 1 and value == 1:
+            return True
+        for other in self.rect_to_vars[rect]:
+            if other != var and 1 in domains[other]:
+                return True
+        return False
+
+    def _revise(self, var, rect, domains):
+        revised = False
+        for value in list(domains[var]):
+            if not self._has_support(var, value, rect, domains):
+                domains[var].remove(value)
+                revised = True
+        return revised
+
+    def _ac3(self, domains, queue=None):
+        if queue is None:
+            queue = deque((var, r) for r, scope in self.rect_to_vars.items() for var in scope)
+        else:
+            queue = deque(queue)
+
+        while queue:
+            var, rect = queue.popleft()
+            if self._revise(var, rect, domains):
+                if not domains[var]:
+                    return False
+
+                for other_rect in self.var_to_rects[var]:
+                    for other_var in self.rect_to_vars[other_rect]:
+                        if other_var != var:
+                            queue.append((other_var, other_rect))
+
         return True
 
-    def backtrack(self, assignment, idx=0):
-        if idx == self.m:
-            if all(self.is_covered(assignment, r) for r in self.required):
+    def _backtrack_mac(self, domains):
+        if all(len(dom) == 1 for dom in domains):
+            assignment = [next(iter(dom)) for dom in domains]
+            if all(any(assignment[i] == 1 for i in self.rect_to_vars[r]) for r in self.required):
                 return assignment
             return None
 
-        for val in [0,1]:
-            assignment[idx] = val
-            if self.valid_partial(assignment):
-                result = self.backtrack(assignment, idx+1)
-                if result:
+        var = min((i for i in range(self.m) if len(domains[i]) > 1), key=lambda i: len(domains[i]), default=None)
+        if var is None:
+            return None
+
+        for value in [0, 1]:
+            if value not in domains[var]:
+                continue
+
+            new_domains = [set(dom) for dom in domains]
+            new_domains[var] = set([value])
+
+            local_queue = []
+            for rect in self.var_to_rects[var]:
+                for scope_var in self.rect_to_vars[rect]:
+                    local_queue.append((scope_var, rect))
+
+            if self._ac3(new_domains, local_queue):
+                result = self._backtrack_mac(new_domains)
+                if result is not None:
                     return result
-            assignment[idx] = None
+
         return None
 
     def solve(self):
-        return self.backtrack([None]*self.m)
+        if any(len(self.rect_to_vars[r]) == 0 for r in self.required):
+            return None
+
+        domains = self._initial_domains()
+        if not self._ac3(domains):
+            return None
+
+        return self._backtrack_mac(domains)
 ```
 
 ## 12.4 Implementação de Programação Dinâmica
@@ -900,7 +997,7 @@ def build_expanded_coverage_sets(instance, D):
 
 # 13. Algoritmo de Benchmarking
 
-Para medir o desempenho médio dos algoritmos implementados, foi utilizado o script `performance_benchmarker.py`, baseado em execução isolada por processo e limitação temporal por instância.
+Para medir o desempenho médio dos algoritmos implementados, foi utilizado o script `performance_benchmarker.py`, baseado em execução isolada por processo, limitação temporal por execução e geração de subconjuntos obrigatórios por rácio.
 
 ## 13.1 Estratégia de Medição
 
@@ -908,9 +1005,11 @@ A metodologia adotada segue os passos:
 
 1. Ler as instâncias de cada ficheiro de entrada;
 2. Construir, para cada instância, os conjuntos de cobertura e a matriz binária de cobertura $A$;
-3. Executar cada solver em processo separado (`multiprocessing.Process`);
-4. Impor limite máximo de execução de 60 segundos por execução;
-5. Repetir várias execuções e calcular o tempo médio com `statistics.mean`.
+3. Gerar subconjuntos `required` para cada rácio de cobertura;
+4. Executar cada solver em processo separado (`multiprocessing.Process`);
+5. Impor limite máximo de execução de 60 segundos por execução;
+6. Em caso de timeout/erro, desativar o método para as iterações seguintes;
+7. Repetir várias execuções e calcular métricas médias com `statistics.mean`.
 
 A execução isolada por processo permite interromper algoritmos que excedam o tempo máximo sem bloquear o benchmarking global.
 
@@ -938,6 +1037,7 @@ Benchmark(files, solvers, runs, time_limit):
 
             se timeout:
                 escrever "time limit exceeded"
+                desativar solver para iterações seguintes
             senão:
                 escrever mean(times)
 ```
@@ -947,17 +1047,20 @@ Benchmark(files, solvers, runs, time_limit):
 ```python
 TIME_LIMIT = 60
 
-def time_solver(solver_func, coverage_sets, A, i, queue):
+def time_solver(solver_func, coverage_sets, A, inst, required, expand_distance, queue):
     try:
-        result = solver_func(coverage_sets, A, i)
-        queue.put(("ok", result))
+        metrics = solver_func(coverage_sets, A, inst, required, expand_distance)
+        queue.put(("ok", metrics))
     except Exception as e:
         queue.put(("err", repr(e)))
 
 
-def benchmark_one(solver_func, coverage_sets, A, i):
+def benchmark_one(solver_func, coverage_sets, A, inst, required, expand_distance):
     queue = mp.Queue()
-    p = mp.Process(target=time_solver, args=(solver_func, coverage_sets, A, i, queue))
+    p = mp.Process(
+        target=time_solver,
+        args=(solver_func, coverage_sets, A, inst, required, expand_distance, queue),
+    )
 
     start = time.perf_counter()
     p.start()
@@ -969,31 +1072,46 @@ def benchmark_one(solver_func, coverage_sets, A, i):
         return None
 
     end = time.perf_counter()
-    return end - start
+    if queue.empty():
+        return None
+
+    status, payload = queue.get()
+    if status != "ok":
+        return None
+
+    return end - start, payload
 
 
-def benchmarker(instances, solver_func, runs=2):
-    instance_times = []
+def benchmark_tasks(solver_func, tasks, repetitions=1, expand_distance=1):
+    times = []
 
-    for _ in range(runs):
-        for i in instances:
-            coverage_sets, vertices = build_coverage_sets(i)
-
-            A = [[0 for _ in i.rectangles] for _ in vertices]
-            for vi, cov in enumerate(coverage_sets):
-                for r in cov:
-                    A[vi][r] = 1
-
-            t = benchmark_one(solver_func, coverage_sets, A, i)
-            if t is None:
+    for _ in range(repetitions):
+        for coverage_sets, A, inst, required in tasks:
+            result = benchmark_one(
+                solver_func,
+                coverage_sets,
+                A,
+                inst,
+                required,
+                expand_distance,
+            )
+            if result is None:
                 return None
 
-            instance_times.append(t)
+            elapsed, _ = result
+            times.append(elapsed)
 
-    return mean(instance_times)
+    return {"avg_time": mean(times), "samples": len(times)}
+
+active_solvers = dict(selected_solvers)
+for name, solver in list(active_solvers.items()):
+    result = benchmark_tasks(solver, tasks, repetitions=args.repetitions, expand_distance=args.expand_distance)
+    if result is None:
+        # timeout/erro -> desativa para as próximas iterações
+        del active_solvers[name]
 ```
 
-Esta implementação foi a base dos resultados apresentados no Capítulo 10.
+Esta implementação foi a base dos resultados apresentados no Capítulo 9.
 
 ---
 
@@ -1005,9 +1123,7 @@ Esta decisão revelou-se particularmente vantajosa porque permitiu reutilizar ex
 
 Em termos computacionais observou-se:
 
-- Greedy: excelente escalabilidade;
-- OR-Tools: melhor compromisso entre optimalidade e desempenho;
-- MAC+AC3: implementação académica rica e eficiente;
-- DP: forte valor teórico mas escalabilidade limitada.
-
-#
+- Greedy: útil como baseline heurístico e para soluções rápidas, mas com degradação marcada em instâncias grandes;
+- OR-Tools (CP-SAT): abordagem mais eficiente na prática e mais robusta nos resultados obtidos;
+- MAC+AC3: implementação académica rica, competitiva em pequena/média escala, mas com limitações em grande dimensão;
+- DP: forte valor teórico, com escalabilidade limitada pela natureza exponencial.
