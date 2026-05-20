@@ -18,30 +18,11 @@ def parse_instances(filename):
         raw_lines = [ln.strip() for ln in f if ln.strip()]
 
     instances = []
-    i = 0
-
-    # optional number of instances
-    n = None
-    if (
-        i + 1 < len(raw_lines)
-        and len(raw_lines[i].split()) == 1
-        and len(raw_lines[i + 1].split()) == 1
-    ):
-        try:
-            n = int(raw_lines[i])
-            i += 1
-        except ValueError:
-            pass
-
+    i = 1
+    n = int(raw_lines[0]) # number of instances
     instances_parsed = 0
 
-    while i < len(raw_lines) and (n is None or instances_parsed < n):
-
-        # instance size k
-        if len(raw_lines[i].split()) != 1:
-            raise ValueError(
-                f"Expected instance grid size k at line {i+1}: '{raw_lines[i]}'"
-            )
+    while i < len(raw_lines) and instances_parsed < n:
 
         k = int(raw_lines[i])
         inst = Instance(k)
@@ -56,12 +37,7 @@ def parse_instances(filename):
             if len(parts) == 1:
                 break
 
-            try:
-                nums = list(map(int, parts))
-            except ValueError:
-                raise ValueError(
-                    f"Non-integer token on line {i+1}: '{raw_lines[i]}'"
-                )
+            nums = list(map(int, parts))
 
             rid = nums[0]
             m = nums[1]

@@ -162,6 +162,8 @@ Cada retângulo deve ser coberto por pelo menos um guarda.
 
 ## 4.2 Complexidade
 
+O modelo contém $m$ variáveis binárias e $O(n)$ restrições de cobertura (uma por retângulo).
+
 A formulação é NP-difícil por equivalência ao problema de Set Cover.
 
 No entanto, solvers modernos conseguem resolver eficientemente instâncias de dimensão moderada.
@@ -361,6 +363,8 @@ Foram ainda produzidas implementações paralelas em:
 - Google OR-Tools.
 
 Esta modularização facilitou a reutilização da mesma matriz de cobertura por todos os paradigmas de resolução.
+
+Todos os solvers implementados suportam cobertura parcial através do parâmetro `required`, que recebe os índices (base 0) dos retângulos obrigatórios. Quando omitido, é assumida cobertura total, conforme descrito na Secção 2.3.
 
 ---
 
