@@ -95,6 +95,8 @@ if __name__ == '__main__':
         from . import greedy as greedy_mod
         from . import integer_solver as integer_mod
         from . import csp_mac as csp_mod
+        from . import weighted_greedy as weighted_greedy_mod
+        
         try:
             from . import extensions as extensions_mod
         except Exception:
@@ -110,6 +112,7 @@ if __name__ == '__main__':
         greedy_mod = importlib.import_module('greedy')
         integer_mod = importlib.import_module('integer_solver')
         csp_mod = importlib.import_module('csp_mac')
+        weighted_greedy_mod = importlib.import_module('weighted_greedy')
         # optional extensions module
         try:
             extensions_mod = importlib.import_module('extensions')
@@ -130,6 +133,10 @@ if __name__ == '__main__':
 
     def _run_greedy(coverage_sets, A, inst):
         solver = greedy_mod.GreedySolver(A)
+        return solver.solve() or []
+    
+    def _run_weighted_greedy(coverage_sets, A, inst):
+        solver = weighted_greedy_mod.WeightedGreedySolver(A)
         return solver.solve() or []
 
     def _run_integer(coverage_sets, A, inst):
@@ -216,6 +223,11 @@ if __name__ == '__main__':
         'greedy': (
             _run_greedy,
             'Greedy heuristic (fast, non-optimal)'
+        ),
+        
+        'weighted_greedy':(
+            _run_weighted_greedy,
+            'Weighted greedy heuristic'
         ),
 
         'integer': (

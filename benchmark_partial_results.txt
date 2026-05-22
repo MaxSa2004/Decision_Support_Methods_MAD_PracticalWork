@@ -1,0 +1,240 @@
+Benchmark unificado de cobertura parcial
+suite=all
+solvers=dynamic,greedy,integer,csp,coloring,expand
+TIME_LIMIT=60s
+seed=42
+ratios=[0.1, 0.25, 0.5, 0.75, 1.0]
+samples_per_ratio=3
+repetitions=1
+expand_distance=3
+
+==== example_inputs/10rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=1.00) --
+dynamic: avg_time=0.792226s, avg_guards=1.000, samples=15
+greedy: avg_time=0.776616s, avg_guards=1.000, samples=15
+integer: avg_time=0.787985s, avg_guards=1.000, samples=15
+csp: avg_time=0.790211s, avg_guards=1.000, samples=15
+coloring: avg_time=0.790978s, avg_guards=1.000, avg_colors=1.000, samples=15
+expand: avg_time=0.822664s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=2.00) --
+dynamic: avg_time=0.846458s, avg_guards=1.667, samples=15
+greedy: avg_time=0.795432s, avg_guards=1.667, samples=15
+integer: avg_time=0.835676s, avg_guards=1.667, samples=15
+csp: avg_time=0.838812s, avg_guards=1.800, samples=15
+coloring: avg_time=0.826851s, avg_guards=1.667, avg_colors=1.000, samples=15
+expand: avg_time=0.833673s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=5.00) --
+dynamic: avg_time=0.876847s, avg_guards=2.800, samples=15
+greedy: avg_time=0.810627s, avg_guards=2.933, samples=15
+integer: avg_time=0.795821s, avg_guards=2.800, samples=15
+csp: avg_time=0.787912s, avg_guards=3.400, samples=15
+coloring: avg_time=0.787261s, avg_guards=2.800, avg_colors=1.267, samples=15
+expand: avg_time=0.795207s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=8.00) --
+dynamic: avg_time=0.751379s, avg_guards=3.467, samples=15
+greedy: avg_time=0.733727s, avg_guards=3.667, samples=15
+integer: avg_time=0.785660s, avg_guards=3.467, samples=15
+csp: avg_time=0.761505s, avg_guards=4.600, samples=15
+coloring: avg_time=0.797037s, avg_guards=3.467, avg_colors=1.667, samples=15
+expand: avg_time=0.776864s, avg_guards=1.000, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=10.00) --
+dynamic: avg_time=0.747678s, avg_guards=4.000, samples=15
+greedy: avg_time=0.744075s, avg_guards=4.000, samples=15
+integer: avg_time=0.781755s, avg_guards=4.000, samples=15
+csp: avg_time=0.743306s, avg_guards=5.200, samples=15
+coloring: avg_time=0.765414s, avg_guards=4.000, avg_colors=2.000, samples=15
+expand: avg_time=0.769877s, avg_guards=1.000, samples=15
+
+
+==== example_inputs/30rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=3.00) --
+dynamic: avg_time=0.889798s, avg_guards=2.600, samples=15
+greedy: avg_time=0.757238s, avg_guards=2.600, samples=15
+integer: avg_time=0.759185s, avg_guards=2.600, samples=15
+csp: avg_time=0.734102s, avg_guards=2.667, samples=15
+coloring: avg_time=0.788553s, avg_guards=2.600, avg_colors=1.000, samples=15
+expand: avg_time=0.761045s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=8.00) --
+dynamic: time limit exceeded/error (60 seconds)
+dynamic: disabled for all next iterations
+greedy: avg_time=0.790814s, avg_guards=5.267, samples=15
+integer: avg_time=0.780835s, avg_guards=5.267, samples=15
+csp: avg_time=0.779289s, avg_guards=6.067, samples=15
+coloring: avg_time=0.804794s, avg_guards=5.267, avg_colors=1.200, samples=15
+expand: avg_time=0.805622s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=15.00) --
+greedy: avg_time=0.788624s, avg_guards=8.200, samples=15
+integer: avg_time=0.816227s, avg_guards=7.600, samples=15
+csp: avg_time=0.787897s, avg_guards=8.733, samples=15
+coloring: avg_time=0.814248s, avg_guards=7.600, avg_colors=2.333, samples=15
+expand: avg_time=0.802236s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=22.00) --
+greedy: avg_time=0.787108s, avg_guards=10.067, samples=15
+integer: avg_time=0.800948s, avg_guards=9.400, samples=15
+csp: avg_time=0.784855s, avg_guards=11.200, samples=15
+coloring: avg_time=0.810304s, avg_guards=9.400, avg_colors=2.200, samples=15
+expand: avg_time=0.808613s, avg_guards=1.000, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=30.00) --
+greedy: avg_time=0.795982s, avg_guards=13.000, samples=15
+integer: avg_time=0.808434s, avg_guards=11.200, samples=15
+csp: avg_time=0.779224s, avg_guards=12.800, samples=15
+coloring: avg_time=0.803333s, avg_guards=11.200, avg_colors=2.400, samples=15
+expand: avg_time=0.851740s, avg_guards=1.000, samples=15
+
+
+==== example_inputs/50rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=5.00) --
+greedy: avg_time=0.789282s, avg_guards=4.200, samples=15
+integer: avg_time=0.792324s, avg_guards=4.200, samples=15
+csp: avg_time=0.788809s, avg_guards=4.533, samples=15
+coloring: avg_time=0.803638s, avg_guards=4.200, avg_colors=1.133, samples=15
+expand: avg_time=0.823614s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=12.00) --
+greedy: avg_time=0.798584s, avg_guards=7.800, samples=15
+integer: avg_time=0.804585s, avg_guards=7.800, samples=15
+csp: avg_time=0.780538s, avg_guards=8.600, samples=15
+coloring: avg_time=0.817472s, avg_guards=7.800, avg_colors=1.600, samples=15
+expand: avg_time=0.825316s, avg_guards=1.000, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=25.00) --
+greedy: avg_time=0.801569s, avg_guards=13.267, samples=15
+integer: avg_time=0.836930s, avg_guards=12.667, samples=15
+csp: avg_time=0.788780s, avg_guards=14.133, samples=15
+coloring: avg_time=0.825557s, avg_guards=12.667, avg_colors=2.267, samples=15
+expand: avg_time=0.826929s, avg_guards=1.067, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=38.00) --
+greedy: avg_time=0.795923s, avg_guards=17.200, samples=15
+integer: avg_time=0.842011s, avg_guards=15.400, samples=15
+csp: avg_time=1.043769s, avg_guards=17.267, samples=15
+coloring: avg_time=0.949742s, avg_guards=15.400, avg_colors=2.533, samples=15
+expand: avg_time=0.869918s, avg_guards=1.133, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=50.00) --
+greedy: avg_time=0.791285s, avg_guards=19.800, samples=15
+integer: avg_time=0.810600s, avg_guards=17.600, samples=15
+csp: avg_time=0.818874s, avg_guards=20.000, samples=15
+coloring: avg_time=0.828470s, avg_guards=17.600, avg_colors=2.000, samples=15
+expand: avg_time=0.855790s, avg_guards=1.200, samples=15
+
+
+==== example_inputs/100rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=10.00) --
+greedy: avg_time=0.786653s, avg_guards=8.133, samples=15
+integer: avg_time=0.820237s, avg_guards=8.067, samples=15
+csp: avg_time=0.818465s, avg_guards=8.333, samples=15
+coloring: avg_time=0.805563s, avg_guards=8.067, avg_colors=1.200, samples=15
+expand: avg_time=0.834440s, avg_guards=1.267, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=25.00) --
+greedy: avg_time=0.801677s, avg_guards=15.667, samples=15
+integer: avg_time=0.818350s, avg_guards=15.533, samples=15
+csp: avg_time=0.839561s, avg_guards=17.333, samples=15
+coloring: avg_time=0.819553s, avg_guards=15.533, avg_colors=2.067, samples=15
+expand: avg_time=0.867469s, avg_guards=1.733, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=50.00) --
+greedy: avg_time=0.844170s, avg_guards=25.467, samples=15
+integer: avg_time=0.844433s, avg_guards=24.067, samples=15
+csp: avg_time=0.812151s, avg_guards=27.267, samples=15
+coloring: avg_time=0.833215s, avg_guards=24.067, avg_colors=2.733, samples=15
+expand: avg_time=0.912222s, avg_guards=2.000, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=75.00) --
+greedy: avg_time=0.837970s, avg_guards=33.533, samples=15
+integer: avg_time=0.870281s, avg_guards=30.267, samples=15
+csp: avg_time=0.949448s, avg_guards=34.467, samples=15
+coloring: avg_time=1.168274s, avg_guards=30.267, avg_colors=2.667, samples=15
+expand: avg_time=0.885843s, avg_guards=2.000, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=100.00) --
+greedy: avg_time=0.941778s, avg_guards=40.600, samples=15
+integer: avg_time=0.820972s, avg_guards=34.600, samples=15
+csp: avg_time=0.780214s, avg_guards=40.200, samples=15
+coloring: avg_time=0.840153s, avg_guards=34.600, avg_colors=2.267, samples=15
+expand: avg_time=0.842208s, avg_guards=2.000, samples=15
+
+
+==== example_inputs/500rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=50.00) --
+greedy: avg_time=1.113611s, avg_guards=39.533, samples=15
+integer: avg_time=0.985351s, avg_guards=39.400, samples=15
+csp: avg_time=1.950197s, avg_guards=41.933, samples=15
+coloring: avg_time=0.853739s, avg_guards=39.400, avg_colors=2.067, samples=15
+expand: avg_time=1.221287s, avg_guards=3.200, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=125.00) --
+greedy: avg_time=1.100716s, avg_guards=80.800, samples=15
+integer: avg_time=0.958642s, avg_guards=79.867, samples=15
+csp: avg_time=1.698515s, avg_guards=86.600, samples=15
+coloring: avg_time=0.912545s, avg_guards=79.867, avg_colors=5.467, samples=15
+expand: avg_time=1.234130s, avg_guards=4.600, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=250.00) --
+greedy: avg_time=1.260119s, avg_guards=126.267, samples=15
+integer: avg_time=0.925648s, avg_guards=119.600, samples=15
+csp: avg_time=1.608324s, avg_guards=134.733, samples=15
+coloring: avg_time=0.950481s, avg_guards=119.600, avg_colors=6.267, samples=15
+expand: avg_time=1.373640s, avg_guards=5.400, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=375.00) --
+greedy: avg_time=1.767941s, avg_guards=165.400, samples=15
+integer: avg_time=0.946774s, avg_guards=149.400, samples=15
+csp: avg_time=1.858081s, avg_guards=168.733, samples=15
+coloring: avg_time=1.036843s, avg_guards=149.400, avg_colors=5.733, samples=15
+expand: avg_time=1.416966s, avg_guards=5.667, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=500.00) --
+greedy: avg_time=2.747736s, avg_guards=198.200, samples=15
+integer: avg_time=1.369674s, avg_guards=172.200, samples=15
+csp: avg_time=2.142390s, avg_guards=193.600, samples=15
+coloring: avg_time=1.395264s, avg_guards=172.200, avg_colors=3.800, samples=15
+expand: avg_time=1.453701s, avg_guards=6.200, samples=15
+
+
+==== example_inputs/1000rect_5instances ====
+-- required_ratio=0.10 (avg_required_rectangles=100.00) --
+greedy: avg_time=1.452302s, avg_guards=80.667, samples=15
+integer: avg_time=0.968017s, avg_guards=80.667, samples=15
+csp: time limit exceeded/error (60 seconds)
+csp: disabled for all next iterations
+coloring: avg_time=0.981642s, avg_guards=80.667, avg_colors=3.133, samples=15
+expand: avg_time=2.758582s, avg_guards=4.933, samples=15
+
+-- required_ratio=0.25 (avg_required_rectangles=250.00) --
+greedy: avg_time=2.210599s, avg_guards=160.867, samples=15
+integer: avg_time=1.015429s, avg_guards=158.467, samples=15
+coloring: avg_time=1.038504s, avg_guards=158.467, avg_colors=6.667, samples=15
+expand: avg_time=2.659493s, avg_guards=7.600, samples=15
+
+-- required_ratio=0.50 (avg_required_rectangles=500.00) --
+greedy: avg_time=4.691268s, avg_guards=255.067, samples=15
+integer: avg_time=1.135675s, avg_guards=242.400, samples=15
+coloring: avg_time=1.135838s, avg_guards=242.400, avg_colors=14.333, samples=15
+expand: avg_time=2.789065s, avg_guards=8.933, samples=15
+
+-- required_ratio=0.75 (avg_required_rectangles=750.00) --
+greedy: avg_time=8.375280s, avg_guards=330.067, samples=15
+integer: avg_time=1.134655s, avg_guards=299.000, samples=15
+coloring: avg_time=1.203646s, avg_guards=299.000, avg_colors=10.533, samples=15
+expand: avg_time=3.125126s, avg_guards=9.867, samples=15
+
+-- required_ratio=1.00 (avg_required_rectangles=1000.00) --
+greedy: avg_time=13.041380s, avg_guards=401.200, samples=15
+integer: avg_time=2.668006s, avg_guards=345.400, samples=15
+coloring: avg_time=2.640811s, avg_guards=345.400, avg_colors=6.467, samples=15
+expand: avg_time=3.551379s, avg_guards=10.400, samples=15
+
+
+disabled_solvers=
+- dynamic: timeout/error
+- csp: timeout/error
