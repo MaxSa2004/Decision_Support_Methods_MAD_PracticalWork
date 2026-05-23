@@ -25,9 +25,8 @@ Ao longo do trabalho foram exploradas múltiplas metodologias de resolução, pe
 Foram estudadas as seguintes abordagens:
 
 - Estratégias Greedy;
-- Programação Inteira Binária;
+- Programação Inteira Binária (Google OR-Tools);
 - Programação por Restrições com MAC e AC-3;
-- Resolução em Google OR-Tools;
 - Programação Dinâmica;
 - Extensões do problema com guardas coloridos e guardas de alcance ampliado.
 
@@ -81,19 +80,21 @@ $$
 
 Quando `required` é omitido, assume-se $\Pi' = \Pi$ (cobertura total), preservando o comportamento original. Esta generalização foi implementada em todos os solvers sem alterar a interface existente.
 
-## 2.4 Complexidade: Cobertura Total vs Cobertura de Subconjunto (na teoria)
+## 2.4 Cobertura Total vs Cobertura Parcial (diferenças práticas)
 
-É importante distinguir dois cenários conceptualmente diferentes:
+No contexto deste projeto, tanto a cobertura total como a cobertura parcial são tratadas pela mesma modelação de set cover, mudando apenas o conjunto de retângulos obrigatórios `required`.
 
-- **Cobertura total**: quando o requisito é cobrir a totalidade dos elementos-alvo do modelo, o problema pode, em formulações estruturadas específicas, ser reduzido a um problema clássico com algoritmo polinomial (por exemplo, uma redução para um problema em grafos bipartidos).
-- **Cobertura parcial (subconjunto)**: quando apenas um subconjunto de elementos é obrigatório, essa redução deixa, em geral, de ser válida. O problema resultante mantém a natureza combinatória difícil e é tipicamente NP-hard.
+Assim, as diferenças mais relevantes são práticas/computacionais e não de formulação:
 
-Esta diferença justifica a opção por duas famílias de métodos ao longo do projeto:
+- **Dimensão efetiva do problema**: com cobertura parcial, o número de restrições ativas é menor (
+    $|\Pi'| < |\Pi|$), o que tende a reduzir esforço nos métodos exatos (ILP) e de propagação (CSP).
+- **Comportamento do greedy**: em cobertura total, os métodos greedy tendem a exigir mais iterações (mais retângulos para cobrir). Em cobertura parcial, o número de iterações diminui proporcionalmente ao `required_ratio`.
+- **Programação Dinâmica**: apesar de usar o mesmo mecanismo, continua limitada pelo crescimento exponencial dos estados em função dos retângulos relevantes.
 
-- métodos de otimização exata (ILP/DP) para garantir optimalidade quando a dimensão o permite;
-- métodos heurísticos ou de satisfazibilidade (greedy/CSP) para obter soluções viáveis rapidamente quando a variante parcial conduz a instâncias computacionalmente mais exigentes.
+Na prática, isto justifica manter duas famílias de métodos:
 
-Do ponto de vista prático, o greedy não garante solução ótima no caso NP-hard, mas constitui uma estratégia de aproximação eficaz, com boa relação entre qualidade da solução e tempo de execução.
+- métodos exatos (ILP/DP), quando a dimensão permite otimização global;
+- métodos heurísticos/de satisfazibilidade (greedy/CSP), quando se privilegia rapidez de obtenção de soluções viáveis.
 
 ---
 
@@ -101,13 +102,16 @@ Do ponto de vista prático, o greedy não garante solução ótima no caso NP-ha
 
 ## 3.1 Motivação
 
-As estratégias greedy foram utilizadas como primeira abordagem heurística devido à sua simplicidade de implementação e reduzido custo computacional.
+As estratégias greedy foram usadas como primeira família heurística por serem simples, rápidas e fáceis de integrar na mesma matriz de cobertura $A$.
 
-Estas heurísticas constroem a solução incrementalmente, tomando em cada passo a decisão local aparentemente mais vantajosa.
+Foram implementadas **duas variantes**:
 
-## 3.2 Heurística de Máxima Cobertura Residual
+- greedy clássico por máxima cobertura residual;
+- greedy ponderado, com prioridade para retângulos "raros" (com menos opções de guarda).
 
-Em cada iteração é selecionado o vértice que cobre o maior número de retângulos ainda não vigiados.
+## 3.2 Greedy Clássico: Máxima Cobertura Residual
+
+Em cada iteração seleciona-se o vértice que cobre o maior número de retângulos ainda não vigiados.
 
 ### Pseudocódigo
 
@@ -121,28 +125,39 @@ GreedyCoverage(U, V):
     return guards
 ```
 
-## 3.3 Complexidade
+## 3.3 Greedy Ponderado com Estrutura de Grafo Bipartido
 
-Sejam:
+Na segunda variante, explorou-se explicitamente a estrutura bipartida vértices-retângulos implícita em $A$.
 
-- $m$ o número de vértices;
-- $n$ o número de retângulos.
+Em vez de reavaliar toda a matriz em cada passo, foram pré-computadas adjacências:
 
-A cada iteração é necessário avaliar a cobertura residual de todos os vértices, resultando numa complexidade aproximada:
+- `rect_to_vertices[r]`: vértices que cobrem o retângulo $r$;
+- `vertex_to_required[v]`: retângulos obrigatórios cobertos por $v$.
+
+Cada retângulo recebe peso inversamente proporcional ao seu grau:
 
 $$
-O(m \cdot n)
+w(r) = \frac{1}{\deg(r)}
 $$
 
-por iteração, conduzindo na prática a tempos de execução muito baixos.
+e o score de cada vértice passa a ser a soma dos pesos dos retângulos ainda não cobertos que ele vigia. A seleção do melhor vértice é feita com heap (max-heap via `heapq` com valores negativos), atualizando apenas os ganhos afetados quando um retângulo fica coberto.
 
-## 3.4 Discussão
+Isto evita varreduras completas repetidas e reduz substancialmente trabalho redundante.
 
-A abordagem greedy revelou-se adequada para produzir soluções, mesmo em instâncias de grande dimensão. Contudo, por não considerar consequências globais futuras, conduz frequentemente a soluções subótimas.
+## 3.4 Complexidade e Impacto Prático
 
-Este comportamento torna-se particularmente relevante no cenário de cobertura parcial (subconjunto obrigatório), onde a estrutura do problema deixa de permitir reduções polinomiais diretas e a dificuldade combinatória aumenta. Nesses casos, as heurísticas greedy funcionam como algoritmos de aproximação: sacrificam garantia de optimalidade, mas devolvem soluções viáveis em tempos reduzidos.
+No greedy clássico, cada iteração volta a percorrer muitos pares vértice-retângulo ativos.
 
-Apesar disso, os resultados experimentais mostram que, para instâncias muito grandes, o OR-Tools (CP-SAT) foi mais eficiente na prática do que o greedy.
+No greedy ponderado, a adjacência é construída uma vez e as atualizações passam a ser incrementais, com custo dominado por operações sobre arestas incidentes e heap. Em prática, o tempo fica muito mais estável com o aumento de `required_ratio` e do tamanho da instância.
+
+## 3.5 Discussão
+
+As duas variantes mantêm natureza heurística (sem garantia de optimalidade), mas a variante ponderada mostrou melhor compromisso tempo/qualidade no benchmark:
+
+- tempo significativamente inferior ao greedy clássico em instâncias grandes;
+- ligeira melhoria no número médio de guardas na maioria dos casos grandes.
+
+Ainda assim, para garantir solução ótima, o CP-SAT mantém vantagem metodológica.
 
 ---
 
@@ -377,6 +392,7 @@ A implementação foi desenvolvida integralmente em Python, organizando-se da se
 
 - `main.py`, leitura da partição, construção da matriz de cobertura e print dos resultados do método escolhido;
 - `greedy.py`, heurísticas greedy;
+- `weighted_greedy.py`, greedy ponderado com atualização incremental por adjacências;
 - `integer_solver.py`, modelo de programação inteira - Google OR-Tools;
 - `csp_mac.py`, backtracking com MAC + AC3;
 - `dynamic.py`, programação dinâmica;
@@ -391,11 +407,12 @@ Todos os solvers implementados suportam cobertura parcial através do parâmetro
 
 # 9. Resultados Experimentais
 
-Para avaliar o desempenho das abordagens implementadas, foi utilizado o script unificado `performance_benchmarker.py`, que executa métodos base e extensões no mesmo pipeline experimental.
+Para avaliar o desempenho das abordagens implementadas, foi utilizado o script unificado `performance_benchmarker.py`.
 
-Configuração usada (conforme `benchmarks_results.txt`):
+Os resultados calculados estão em `benchmarks_results.txt`.
 
-- `suite=all`;
+Configuração comum relevante:
+
 - `ratios=[0.1, 0.25, 0.5, 0.75, 1.0]`;
 - `samples_per_ratio=3`;
 - `repetitions=1`;
@@ -405,25 +422,28 @@ Como `ratio=1.0` é equivalente à cobertura total, este rácio é o mais releva
 
 ## 9.1 Resultados Obtidos (ratio = 1.0)
 
-| Instância             | Dynamic | Greedy     | Integer    | CSP        | Coloring   | Expand     |
-| --------------------- | ------- | ---------- | ---------- | ---------- | ---------- | ---------- |
-| `10rect_5instances`   | 0.686573 s | 0.659276 s | 0.654564 s | 0.632468 s | 0.648752 s | 0.649922 s |
-| `30rect_5instances`   | n/a (desativado) | 0.764849 s | 0.698455 s | 0.659104 s | 0.659815 s | 0.651680 s |
-| `50rect_5instances`   | n/a | 0.893004 s | 0.749201 s | 0.674262 s | 0.677816 s | 0.668987 s |
-| `100rect_5instances`  | n/a | 0.669252 s | 0.705239 s | 0.660147 s | 0.694367 s | 0.693594 s |
-| `500rect_5instances`  | n/a | 2.155261 s | 0.987748 s | 0.979763 s | 0.994068 s | 0.992772 s |
-| `1000rect_5instances` | n/a | 15.593268 s | 2.227116 s | n/a (desativado) | 2.329794 s | 1.907156 s |
+| Instância             | Dynamic | Greedy     | Weighted Greedy | Integer    | CSP        | Coloring   | Expand     |
+| --------------------- | ------- | ---------- | --------------- | ---------- | ---------- | ---------- | ---------- |
+| `10rect_5instances`   | 0.686573 s | 0.659276 s | 0.715872 s | 0.654564 s | 0.632468 s | 0.648752 s | 0.649922 s |
+| `30rect_5instances`   | n/a (desativado) | 0.764849 s | 0.688910 s | 0.698455 s | 0.659104 s | 0.659815 s | 0.651680 s |
+| `50rect_5instances`   | n/a | 0.893004 s | 0.655864 s | 0.749201 s | 0.674262 s | 0.677816 s | 0.668987 s |
+| `100rect_5instances`  | n/a | 0.669252 s | 0.666190 s | 0.705239 s | 0.660147 s | 0.694367 s | 0.693594 s |
+| `500rect_5instances`  | n/a | 2.155261 s | 0.693060 s | 0.987748 s | 0.979763 s | 0.994068 s | 0.992772 s |
+| `1000rect_5instances` | n/a | 12.593268 s | 0.738559 s | 2.227116 s | n/a (desativado) | 2.329794 s | 1.907156 s |
 
 No próprio benchmark, os métodos foram removidos das iterações seguintes após timeout:
 
 - `dynamic` (timeout em `30rect_5instances`, `ratio=0.25`);
 - `csp` (timeout em `1000rect_5instances`, `ratio=0.10`).
 
+Na campanha dedicada ao weighted greedy não houve timeouts após a refatoração.
+
 ## 9.2 Análise dos Resultados
 
 No cenário equivalente ao problema original (`ratio=1.0`):
 
-- **Greedy** mantém boa simplicidade, mas degrada significativamente em instâncias grandes (15.59 s em 1000 retângulos);
+- **Greedy** mantém boa simplicidade, mas degrada significativamente em instâncias grandes (12.59 s em 1000 retângulos);
+- **Weighted Greedy** mostrou ganho substancial de desempenho em larga escala (0.74 s em 1000 retângulos), com melhoria também no número médio de guardas face ao greedy clássico na maioria das instâncias grandes;
 - **Integer (CP-SAT)** mantém desempenho robusto e controlado até 1000 retângulos (2.23 s), preservando qualidade da solução;
 - **CSP (MAC+AC3)** é competitivo em pequena/média escala, mas não é robusto em grande dimensão; além disso, como é um solver de satisfazibilidade (sem minimização explícita), pode devolver soluções com mais guardas;
 - **Dynamic** confirma limitação exponencial, tornando-se rapidamente impraticável;
@@ -437,19 +457,21 @@ Assim, para cobertura total, os resultados continuam a recomendar **CP-SAT** com
 Para além do caso `ratio=1.0`, os resultados confirmam um comportamento coerente em cobertura parcial:
 
 - quando `required_ratio` aumenta, o número médio de guardas cresce em todos os métodos (como esperado);
-- a diferença entre **greedy** e **integer (CP-SAT)** aumenta com a dimensão da instância;
+- a diferença entre **greedy clássico** e **weighted greedy** cresce com a dimensão da instância, sobretudo em tempo;
+- o **weighted greedy** mantém tempo quase estável entre rácios, devido à atualização incremental por adjacências;
 - o **CP-SAT** mantém melhor robustez temporal para rácios intermédios/altos em instâncias grandes;
 - o **csp** tende a usar mais guardas do que integer/greedy porque procura apenas uma solução viável (não mínima), e perde robustez em larga escala;
 - a extensão **expand** reduz fortemente o número de guardas, por aumentar o alcance efetivo de cada guarda.
 
 Exemplo representativo em `1000rect_5instances`:
 
-- `ratio=0.10`: greedy = 1.022637 s, integer = 0.772197 s;
-- `ratio=0.50`: greedy = 5.691275 s, integer = 1.149051 s;
-- `ratio=0.75`: greedy = 10.535604 s, integer = 0.942098 s;
-- `ratio=1.00`: greedy = 15.593268 s, integer = 2.227116 s.
 
-Ou seja, mesmo no cenário parcial, os dados do benchmark corroboram que, na prática, **OR-Tools (CP-SAT)** é a alternativa mais eficiente para instâncias grandes, enquanto o greedy é útil sobretudo como baseline heurístico rápido.
+- `ratio=0.10`: greedy = 1.022637 s, weighted = 0.729967 s, integer = 0.772197 s;
+- `ratio=0.50`: greedy = 5.691275 s, weighted = 0.764288 s, integer = 1.149051 s;
+- `ratio=0.75`: greedy = 10.535604 s, weighted = 0.758712 s, integer = 0.942098 s;
+- `ratio=1.00`: greedy = 12.593268 s, weighted = 0.738559 s, integer = 2.227116 s.
+
+Ou seja, no cenário parcial atual, o **weighted greedy** passou a ser a heurística mais rápida e estável; já o **CP-SAT** mantém a principal vantagem quando o critério é garantia de optimalidade.
 
 ---
 
@@ -457,14 +479,17 @@ Ou seja, mesmo no cenário parcial, os dados do benchmark corroboram que, na pr�
 
 O presente projeto permitiu estudar e comparar múltiplas metodologias de apoio à decisão aplicadas ao problema de vigilância de partições retangulares, um problema de cobertura combinatória com relevância teórica e prática.
 
-Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável para instâncias de dimensão moderada/grande, sofrendo timeout no benchmark unificado. O **CSP com MAC+AC3**, embora competitivo em instâncias pequenas e médias, também apresenta limitações de escalabilidade em dimensão muito elevada e, na versão implementada, não garante mínimo número de guardas por ser um solver de satisfazibilidade. O **Greedy**, apesar de simples e funcional, revelou degradação acentuada no caso de cobertura total (`ratio=1.0`), atingindo 15.59 s para 1000 retângulos.
+Os resultados experimentais confirmam as expectativas teóricas de forma clara. A **Programação Dinâmica** mostrou-se impraticável para instâncias de dimensão moderada/grande, sofrendo timeout no benchmark unificado. O **CSP com MAC+AC3**, embora competitivo em instâncias pequenas e médias, também apresenta limitações de escalabilidade em dimensão muito elevada e, na versão implementada, não garante mínimo número de guardas por ser um solver de satisfazibilidade. O **Greedy clássico**, apesar de simples e funcional, revelou degradação acentuada no caso de cobertura total (`ratio=1.0`), atingindo 12.59 s para 1000 retângulos.
+
+Com a introdução do **Weighted Greedy** com atualização incremental baseada na estrutura bipartida vértice-retângulo, obteve-se uma melhoria prática expressiva de desempenho (0.74 s no mesmo cenário de 1000 retângulos), mantendo qualidade heurística competitiva.
 
 A **Programação Inteira com OR-Tools (CP-SAT)** destacou-se novamente como a abordagem mais robusta: no cenário equivalente à cobertura total (`ratio=1.0`) manteve desempenho na ordem dos 2 s para 1000 retângulos, com garantia de optimalidade. É a escolha recomendada para instâncias em que se exija simultaneamente qualidade e escalabilidade.
 
 Em suma:
 
 - **OR-Tools (CP-SAT)** - solução preferencial: ótima, rápida e escalável;
-- **Greedy** - útil como heurística inicial;
+- **Weighted Greedy** - melhor heurística prática deste trabalho (rápida e estável em larga escala);
+- **Greedy clássico** - baseline simples para comparação;
 - **CSP com MAC+AC3** - adequado para encontrar soluções viáveis em instâncias moderadas, mas sem garantia de mínimo número de guardas e com limites em grande escala;
 - **Programação Dinâmica** - referência de optimalidade, restrita a instâncias pequenas.
 
@@ -639,6 +664,78 @@ class GreedySolver:
 
             guards.append(best_vertex)
             uncovered -= best_cover
+
+        return guards
+```
+
+## 12.1.1 Implementação Weighted Greedy com Estrutura de Grafo Bipartido
+
+```python
+import heapq
+
+class WeightedGreedySolver:
+    def __init__(self, coverage_matrix, required=None):
+        self.A = coverage_matrix
+        self.num_vertices = len(coverage_matrix)
+        self.num_rectangles = len(coverage_matrix[0]) if self.num_vertices > 0 else 0
+        self.required = set(required) if required is not None else set(range(self.num_rectangles))
+
+    def solve(self):
+        if not self.required:
+            return []
+
+        rect_to_vertices = {r: [] for r in self.required}
+        vertex_to_required = [[] for _ in range(self.num_vertices)]
+
+        for v in range(self.num_vertices):
+            row = self.A[v]
+            for r in self.required:
+                if row[r] == 1:
+                    rect_to_vertices[r].append(v)
+                    vertex_to_required[v].append(r)
+
+        for r in self.required:
+            if not rect_to_vertices[r]:
+                return None
+
+        weights = {r: 1.0 / len(rect_to_vertices[r]) for r in self.required}
+
+        gain = [0.0] * self.num_vertices
+        for r in self.required:
+            w = weights[r]
+            for v in rect_to_vertices[r]:
+                gain[v] += w
+
+        heap = [(-gain[v], v) for v in range(self.num_vertices)]
+        heapq.heapify(heap)
+
+        uncovered = set(self.required)
+        guards = []
+
+        while uncovered:
+            best_vertex = None
+
+            while heap:
+                neg_val, v = heapq.heappop(heap)
+                if -neg_val == gain[v]:
+                    best_vertex = v
+                    break
+
+            if best_vertex is None:
+                return None
+
+            covered_now = [r for r in vertex_to_required[best_vertex] if r in uncovered]
+            if not covered_now:
+                return None
+
+            guards.append(best_vertex)
+
+            for r in covered_now:
+                uncovered.remove(r)
+                w = weights[r]
+                for u in rect_to_vertices[r]:
+                    gain[u] -= w
+                    heapq.heappush(heap, (-gain[u], u))
 
         return guards
 ```
@@ -1123,7 +1220,8 @@ Esta decisão revelou-se particularmente vantajosa porque permitiu reutilizar ex
 
 Em termos computacionais observou-se:
 
-- Greedy: útil como baseline heurístico e para soluções rápidas, mas com degradação marcada em instâncias grandes;
+- Greedy clássico: útil como baseline heurístico e para soluções rápidas, mas com degradação marcada em instâncias grandes;
+- Weighted Greedy: aproveita a estrutura bipartida vértice-retângulo com atualizações incrementais e apresentou melhor desempenho temporal no cenário parcial;
 - OR-Tools (CP-SAT): abordagem mais eficiente na prática e mais robusta nos resultados obtidos;
 - MAC+AC3: implementação académica rica, competitiva em pequena/média escala, mas com limitações em grande dimensão;
 - DP: forte valor teórico, com escalabilidade limitada pela natureza exponencial.

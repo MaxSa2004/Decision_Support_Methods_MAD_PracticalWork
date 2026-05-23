@@ -19,6 +19,7 @@ import dynamic as dynamic_mod
 import extensions as extensions_mod
 import greedy as greedy_mod
 import integer_solver as integer_mod
+import weighted_greedy as weighted_greedy_mod
 
 TIME_LIMIT = 60
 
@@ -57,6 +58,11 @@ def run_dynamic(coverage_sets, A, inst, required, expand_distance):
 
 def run_greedy(coverage_sets, A, inst, required, expand_distance):
     solver = greedy_mod.GreedySolver(A, required=required)
+    solution = solver.solve() or []
+    return {"guards": len(solution)}
+
+def run_weighted_greedy(coverage_sets, A, inst, required, expand_distance):
+    solver = weighted_greedy_mod.WeightedGreedySolver(A, required=required)
     solution = solver.solve() or []
     return {"guards": len(solution)}
 
@@ -107,6 +113,7 @@ BASE_SOLVERS = {
     "greedy": run_greedy,
     "integer": run_integer,
     "csp": run_csp,
+    "weighted_greedy": run_weighted_greedy,
 }
 
 EXT_SOLVERS = {

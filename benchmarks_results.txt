@@ -1,6 +1,6 @@
 Benchmark unificado de cobertura parcial
 suite=all
-solvers=dynamic,greedy,integer,csp,coloring,expand
+solvers=dynamic,greedy,weighted_greedy,integer,csp,coloring,expand
 TIME_LIMIT=60s
 seed=42
 ratios=[0.1, 0.25, 0.5, 0.75, 1.0]
@@ -12,6 +12,7 @@ expand_distance=1
 -- required_ratio=0.10 (avg_required_rectangles=1.00) --
 dynamic: avg_time=0.618645s, avg_guards=1.000, samples=15
 greedy: avg_time=0.645256s, avg_guards=1.000, samples=15
+weighted_greedy: avg_time=0.663795s, avg_guards=1.000, samples=15
 integer: avg_time=0.623178s, avg_guards=1.000, samples=15
 csp: avg_time=0.601747s, avg_guards=1.000, samples=15
 coloring: avg_time=0.617971s, avg_guards=1.000, avg_colors=1.000, samples=15
@@ -20,6 +21,7 @@ expand: avg_time=0.622902s, avg_guards=1.000, samples=15
 -- required_ratio=0.25 (avg_required_rectangles=2.00) --
 dynamic: avg_time=0.625371s, avg_guards=1.667, samples=15
 greedy: avg_time=0.618698s, avg_guards=1.667, samples=15
+weighted_greedy: avg_time=0.660161s, avg_guards=1.667, samples=15
 integer: avg_time=0.620586s, avg_guards=1.667, samples=15
 csp: avg_time=0.593985s, avg_guards=1.800, samples=15
 coloring: avg_time=0.615524s, avg_guards=1.667, avg_colors=1.000, samples=15
@@ -28,6 +30,7 @@ expand: avg_time=0.639580s, avg_guards=1.000, samples=15
 -- required_ratio=0.50 (avg_required_rectangles=5.00) --
 dynamic: avg_time=0.610550s, avg_guards=2.800, samples=15
 greedy: avg_time=0.642494s, avg_guards=2.933, samples=15
+weighted_greedy: avg_time=0.637331s, avg_guards=2.800, samples=15
 integer: avg_time=0.681213s, avg_guards=2.800, samples=15
 csp: avg_time=0.605748s, avg_guards=3.400, samples=15
 coloring: avg_time=0.628575s, avg_guards=2.800, avg_colors=1.267, samples=15
@@ -36,6 +39,7 @@ expand: avg_time=0.672629s, avg_guards=1.133, samples=15
 -- required_ratio=0.75 (avg_required_rectangles=8.00) --
 dynamic: avg_time=0.682476s, avg_guards=3.467, samples=15
 greedy: avg_time=0.643065s, avg_guards=3.667, samples=15
+weighted_greedy: avg_time=0.708631s, avg_guards=3.667, samples=15
 integer: avg_time=0.642075s, avg_guards=3.467, samples=15
 csp: avg_time=0.627882s, avg_guards=4.600, samples=15
 coloring: avg_time=0.636122s, avg_guards=3.467, avg_colors=1.667, samples=15
@@ -44,6 +48,7 @@ expand: avg_time=0.697697s, avg_guards=1.200, samples=15
 -- required_ratio=1.00 (avg_required_rectangles=10.00) --
 dynamic: avg_time=0.686573s, avg_guards=4.000, samples=15
 greedy: avg_time=0.659276s, avg_guards=4.000, samples=15
+weighted_greedy: avg_time=0.715872s, avg_guards=4.200, samples=15
 integer: avg_time=0.654564s, avg_guards=4.000, samples=15
 csp: avg_time=0.632468s, avg_guards=5.200, samples=15
 coloring: avg_time=0.648752s, avg_guards=4.000, avg_colors=2.000, samples=15
@@ -54,6 +59,7 @@ expand: avg_time=0.649922s, avg_guards=1.200, samples=15
 -- required_ratio=0.10 (avg_required_rectangles=3.00) --
 dynamic: avg_time=0.765232s, avg_guards=2.600, samples=15
 greedy: avg_time=0.628681s, avg_guards=2.600, samples=15
+weighted_greedy: avg_time=0.696990s, avg_guards=2.600, samples=15
 integer: avg_time=0.639844s, avg_guards=2.600, samples=15
 csp: avg_time=0.622911s, avg_guards=2.667, samples=15
 coloring: avg_time=0.630793s, avg_guards=2.600, avg_colors=1.000, samples=15
@@ -63,6 +69,7 @@ expand: avg_time=0.635538s, avg_guards=1.467, samples=15
 dynamic: time limit exceeded/error (60 seconds)
 dynamic: disabled for all next iterations
 greedy: avg_time=0.687574s, avg_guards=5.267, samples=15
+weighted_greedy: avg_time=0.729509s, avg_guards=5.467, samples=15
 integer: avg_time=0.723451s, avg_guards=5.267, samples=15
 csp: avg_time=0.694608s, avg_guards=6.067, samples=15
 coloring: avg_time=0.698245s, avg_guards=5.267, avg_colors=1.200, samples=15
@@ -70,6 +77,7 @@ expand: avg_time=0.709897s, avg_guards=2.200, samples=15
 
 -- required_ratio=0.50 (avg_required_rectangles=15.00) --
 greedy: avg_time=0.668306s, avg_guards=8.200, samples=15
+weighted_greedy: avg_time=0.674993s, avg_guards=7.867, samples=15
 integer: avg_time=0.691921s, avg_guards=7.600, samples=15
 csp: avg_time=0.715780s, avg_guards=8.733, samples=15
 coloring: avg_time=0.741728s, avg_guards=7.600, avg_colors=2.333, samples=15
@@ -77,6 +85,7 @@ expand: avg_time=0.718153s, avg_guards=2.667, samples=15
 
 -- required_ratio=0.75 (avg_required_rectangles=22.00) --
 greedy: avg_time=0.687451s, avg_guards=10.067, samples=15
+weighted_greedy: avg_time=0.689301s, avg_guards=9.600, samples=15
 integer: avg_time=0.707709s, avg_guards=9.400, samples=15
 csp: avg_time=0.744947s, avg_guards=11.200, samples=15
 coloring: avg_time=0.828397s, avg_guards=9.400, avg_colors=2.200, samples=15
@@ -84,6 +93,7 @@ expand: avg_time=0.748454s, avg_guards=3.067, samples=15
 
 -- required_ratio=1.00 (avg_required_rectangles=30.00) --
 greedy: avg_time=0.764849s, avg_guards=13.000, samples=15
+weighted_greedy: avg_time=0.688910s, avg_guards=12.000, samples=15
 integer: avg_time=0.698455s, avg_guards=11.200, samples=15
 csp: avg_time=0.659104s, avg_guards=12.800, samples=15
 coloring: avg_time=0.659815s, avg_guards=11.200, avg_colors=2.400, samples=15
@@ -93,6 +103,7 @@ expand: avg_time=0.651680s, avg_guards=3.200, samples=15
 ==== example_inputs/50rect_5instances ====
 -- required_ratio=0.10 (avg_required_rectangles=5.00) --
 greedy: avg_time=0.656208s, avg_guards=4.200, samples=15
+weighted_greedy: avg_time=0.696947s, avg_guards=4.200, samples=15
 integer: avg_time=0.647091s, avg_guards=4.200, samples=15
 csp: avg_time=0.631347s, avg_guards=4.533, samples=15
 coloring: avg_time=0.655598s, avg_guards=4.200, avg_colors=1.133, samples=15
@@ -100,6 +111,7 @@ expand: avg_time=0.656065s, avg_guards=2.200, samples=15
 
 -- required_ratio=0.25 (avg_required_rectangles=12.00) --
 greedy: avg_time=0.628895s, avg_guards=7.800, samples=15
+weighted_greedy: avg_time=0.666389s, avg_guards=7.867, samples=15
 integer: avg_time=0.674038s, avg_guards=7.800, samples=15
 csp: avg_time=0.720092s, avg_guards=8.600, samples=15
 coloring: avg_time=0.750879s, avg_guards=7.800, avg_colors=1.600, samples=15
@@ -107,6 +119,7 @@ expand: avg_time=0.730213s, avg_guards=3.133, samples=15
 
 -- required_ratio=0.50 (avg_required_rectangles=25.00) --
 greedy: avg_time=0.720724s, avg_guards=13.267, samples=15
+weighted_greedy: avg_time=0.677586s, avg_guards=13.200, samples=15
 integer: avg_time=0.745014s, avg_guards=12.667, samples=15
 csp: avg_time=0.764585s, avg_guards=14.133, samples=15
 coloring: avg_time=0.699505s, avg_guards=12.667, avg_colors=2.200, samples=15
@@ -114,6 +127,7 @@ expand: avg_time=0.776396s, avg_guards=4.067, samples=15
 
 -- required_ratio=0.75 (avg_required_rectangles=38.00) --
 greedy: avg_time=0.766371s, avg_guards=17.200, samples=15
+weighted_greedy: avg_time=0.663282s, avg_guards=16.600, samples=15
 integer: avg_time=0.775378s, avg_guards=15.400, samples=15
 csp: avg_time=0.750376s, avg_guards=17.267, samples=15
 coloring: avg_time=0.799580s, avg_guards=15.400, avg_colors=2.533, samples=15
@@ -121,6 +135,7 @@ expand: avg_time=0.817309s, avg_guards=4.333, samples=15
 
 -- required_ratio=1.00 (avg_required_rectangles=50.00) --
 greedy: avg_time=0.893004s, avg_guards=19.800, samples=15
+weighted_greedy: avg_time=0.655864s, avg_guards=19.200, samples=15
 integer: avg_time=0.749201s, avg_guards=17.600, samples=15
 csp: avg_time=0.674262s, avg_guards=20.000, samples=15
 coloring: avg_time=0.677816s, avg_guards=17.600, avg_colors=2.000, samples=15
@@ -130,6 +145,7 @@ expand: avg_time=0.668987s, avg_guards=4.800, samples=15
 ==== example_inputs/100rect_5instances ====
 -- required_ratio=0.10 (avg_required_rectangles=10.00) --
 greedy: avg_time=0.664336s, avg_guards=8.133, samples=15
+weighted_greedy: avg_time=0.652925s, avg_guards=8.133, samples=15
 integer: avg_time=0.682567s, avg_guards=8.067, samples=15
 csp: avg_time=0.676022s, avg_guards=8.333, samples=15
 coloring: avg_time=0.700509s, avg_guards=8.067, avg_colors=1.200, samples=15
@@ -137,6 +153,7 @@ expand: avg_time=0.693562s, avg_guards=4.000, samples=15
 
 -- required_ratio=0.25 (avg_required_rectangles=25.00) --
 greedy: avg_time=0.654308s, avg_guards=15.667, samples=15
+weighted_greedy: avg_time=0.670098s, avg_guards=15.667, samples=15
 integer: avg_time=0.675235s, avg_guards=15.533, samples=15
 csp: avg_time=0.643047s, avg_guards=17.333, samples=15
 coloring: avg_time=0.654926s, avg_guards=15.533, avg_colors=2.067, samples=15
@@ -144,6 +161,7 @@ expand: avg_time=0.715793s, avg_guards=5.733, samples=15
 
 -- required_ratio=0.50 (avg_required_rectangles=50.00) --
 greedy: avg_time=0.662732s, avg_guards=25.467, samples=15
+weighted_greedy: avg_time=0.721244s, avg_guards=24.333, samples=15
 integer: avg_time=0.681564s, avg_guards=24.067, samples=15
 csp: avg_time=0.646139s, avg_guards=27.267, samples=15
 coloring: avg_time=0.678427s, avg_guards=24.067, avg_colors=2.733, samples=15
@@ -151,6 +169,7 @@ expand: avg_time=0.701479s, avg_guards=7.000, samples=15
 
 -- required_ratio=0.75 (avg_required_rectangles=75.00) --
 greedy: avg_time=0.673284s, avg_guards=33.533, samples=15
+weighted_greedy: avg_time=0.662735s, avg_guards=32.133, samples=15
 integer: avg_time=0.725730s, avg_guards=30.267, samples=15
 csp: avg_time=0.694557s, avg_guards=34.467, samples=15
 coloring: avg_time=0.674725s, avg_guards=30.267, avg_colors=2.667, samples=15
@@ -158,6 +177,7 @@ expand: avg_time=0.701183s, avg_guards=7.867, samples=15
 
 -- required_ratio=1.00 (avg_required_rectangles=100.00) --
 greedy: avg_time=0.669252s, avg_guards=40.600, samples=15
+weighted_greedy: avg_time=0.666190s, avg_guards=38.200, samples=15
 integer: avg_time=0.705239s, avg_guards=34.600, samples=15
 csp: avg_time=0.660147s, avg_guards=40.200, samples=15
 coloring: avg_time=0.694367s, avg_guards=34.600, avg_colors=2.200, samples=15
@@ -167,6 +187,7 @@ expand: avg_time=0.693594s, avg_guards=8.400, samples=15
 ==== example_inputs/500rect_5instances ====
 -- required_ratio=0.10 (avg_required_rectangles=50.00) --
 greedy: avg_time=0.711683s, avg_guards=39.533, samples=15
+weighted_greedy: avg_time=0.668215s, avg_guards=39.400, samples=15
 integer: avg_time=0.706644s, avg_guards=39.400, samples=15
 csp: avg_time=1.142854s, avg_guards=41.933, samples=15
 coloring: avg_time=0.715475s, avg_guards=39.400, avg_colors=2.067, samples=15
@@ -174,6 +195,7 @@ expand: avg_time=0.870562s, avg_guards=17.200, samples=15
 
 -- required_ratio=0.25 (avg_required_rectangles=125.00) --
 greedy: avg_time=0.815955s, avg_guards=80.800, samples=15
+weighted_greedy: avg_time=0.694810s, avg_guards=80.333, samples=15
 integer: avg_time=0.715685s, avg_guards=79.867, samples=15
 csp: avg_time=1.176931s, avg_guards=86.600, samples=15
 coloring: avg_time=0.728723s, avg_guards=79.867, avg_colors=5.467, samples=15
@@ -181,6 +203,7 @@ expand: avg_time=0.929426s, avg_guards=25.533, samples=15
 
 -- required_ratio=0.50 (avg_required_rectangles=250.00) --
 greedy: avg_time=1.190034s, avg_guards=126.267, samples=15
+weighted_greedy: avg_time=0.691286s, avg_guards=124.467, samples=15
 integer: avg_time=0.776363s, avg_guards=119.600, samples=15
 csp: avg_time=1.099000s, avg_guards=134.733, samples=15
 coloring: avg_time=0.803126s, avg_guards=119.600, avg_colors=6.267, samples=15
@@ -188,6 +211,7 @@ expand: avg_time=0.939489s, avg_guards=32.533, samples=15
 
 -- required_ratio=0.75 (avg_required_rectangles=375.00) --
 greedy: avg_time=1.813602s, avg_guards=165.400, samples=15
+weighted_greedy: avg_time=0.690572s, avg_guards=161.000, samples=15
 integer: avg_time=0.771777s, avg_guards=149.400, samples=15
 csp: avg_time=1.105752s, avg_guards=168.733, samples=15
 coloring: avg_time=0.829789s, avg_guards=149.400, avg_colors=5.800, samples=15
@@ -195,6 +219,7 @@ expand: avg_time=0.939036s, avg_guards=36.333, samples=15
 
 -- required_ratio=1.00 (avg_required_rectangles=500.00) --
 greedy: avg_time=2.155261s, avg_guards=198.200, samples=15
+weighted_greedy: avg_time=0.693060s, avg_guards=194.600, samples=15
 integer: avg_time=0.987748s, avg_guards=172.200, samples=15
 csp: avg_time=0.979763s, avg_guards=193.600, samples=15
 coloring: avg_time=0.994068s, avg_guards=172.200, avg_colors=3.800, samples=15
@@ -204,6 +229,7 @@ expand: avg_time=0.992772s, avg_guards=39.200, samples=15
 ==== example_inputs/1000rect_5instances ====
 -- required_ratio=0.10 (avg_required_rectangles=100.00) --
 greedy: avg_time=1.022637s, avg_guards=80.667, samples=15
+weighted_greedy: avg_time=0.729967s, avg_guards=80.733, samples=15
 integer: avg_time=0.772197s, avg_guards=80.667, samples=15
 csp: time limit exceeded/error (60 seconds)
 csp: disabled for all next iterations
@@ -212,24 +238,28 @@ expand: avg_time=1.304617s, avg_guards=34.400, samples=15
 
 -- required_ratio=0.25 (avg_required_rectangles=250.00) --
 greedy: avg_time=2.022474s, avg_guards=160.867, samples=15
+weighted_greedy: avg_time=0.734476s, avg_guards=159.533, samples=15
 integer: avg_time=0.783685s, avg_guards=158.467, samples=15
 coloring: avg_time=0.846275s, avg_guards=158.467, avg_colors=6.667, samples=15
 expand: avg_time=1.410249s, avg_guards=51.467, samples=15
 
 -- required_ratio=0.50 (avg_required_rectangles=500.00) --
 greedy: avg_time=5.691275s, avg_guards=255.067, samples=15
+weighted_greedy: avg_time=0.764288s, avg_guards=250.933, samples=15
 integer: avg_time=1.149051s, avg_guards=242.400, samples=15
 coloring: avg_time=0.974870s, avg_guards=242.400, avg_colors=14.333, samples=15
 expand: avg_time=1.373068s, avg_guards=64.733, samples=15
 
 -- required_ratio=0.75 (avg_required_rectangles=750.00) --
 greedy: avg_time=10.535604s, avg_guards=330.067, samples=15
+weighted_greedy: avg_time=0.758712s, avg_guards=319.733, samples=15
 integer: avg_time=0.942098s, avg_guards=299.000, samples=15
 coloring: avg_time=1.027829s, avg_guards=299.000, avg_colors=10.533, samples=15
 expand: avg_time=1.508306s, avg_guards=72.600, samples=15
 
 -- required_ratio=1.00 (avg_required_rectangles=1000.00) --
-greedy: avg_time=15.593268s, avg_guards=401.200, samples=15
+greedy: avg_time=12.593268s, avg_guards=401.200, samples=15
+weighted_greedy: avg_time=0.738559s, avg_guards=387.600, samples=15
 integer: avg_time=2.227116s, avg_guards=345.400, samples=15
 coloring: avg_time=2.329794s, avg_guards=345.400, avg_colors=7.600, samples=15
 expand: avg_time=1.907156s, avg_guards=78.000, samples=15
